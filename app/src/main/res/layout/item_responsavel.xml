@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+    android:stateListAnimator="@animator/pressionar_card"
+android:layout_width="170dp"
+android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+android:background="@drawable/borda_card"
+android:padding="10dp"
+android:layout_marginEnd="10dp">
+
+
+    <TextView
+        android:id="@+id/nomeDespesaResponsavel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Luz"
+        android:textSize="15sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/bola"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        tools:srcCompat="@drawable/bola_vermelha"
+        android:layout_marginEnd="3dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/venceEm"
+        app:layout_constraintTop_toTopOf="@id/venceEm"
+        app:layout_constraintBottom_toBottomOf="@id/venceEm"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/venceEm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Vence em 3 dias"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bola"
+        app:layout_constraintTop_toBottomOf="@+id/nomeDespesaResponsavel" />
+
+    <TextView
+        android:id="@+id/total"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Total da conta: 00,00"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/venceEm" />
+
+    <TextView
+        android:id="@+id/suaParte"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Sua parte: 00,00"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/total"/>
+
+    <View
+        android:id="@+id/linha"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/cinzaLinha"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/suaParte"/>
+
+    <TextView
+        android:id="@+id/semContribuicao"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Ninguém precisa te transferir nada."
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linha"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/recebido"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Recebido"
+        android:textSize="14sp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linha"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/valor"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="00,00 de 00,00"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recebido"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <ProgressBar
+        android:id="@+id/barraProgresso"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        android:layout_marginTop="8dp"
+        tools:progress="40"
+        android:progressDrawable="@drawable/barra_progresso"
+        app:layout_constraintTop_toBottomOf="@id/valor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,15 +5,476 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="#FFFFFF">
 
-    <TextView
-        android:layout_width="wrap_content"
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:adjustViewBounds="true"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/cardPessoal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/fundo_verde" />
+
+    <ImageButton
+        android:id="@+id/btnConfig"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/efeito_onda"
+        android:src="@drawable/config"
+        android:contentDescription="Configuração da sala"
+        android:scaleType="fitCenter"
+        android:layout_margin="20dp"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cardPessoal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_resumo"
+        android:padding="10dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="20dp"
+        android:elevation="10dp"
+        app:layout_constraintWidth_percent="0.30"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintEnd_toStartOf="@id/cardSala"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <TextView
+            android:id="@+id/tituloPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pessoal:"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/roxoEscrita"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/pendentePessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pendente:"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/tituloPessoal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="21dp" />
+
+        <TextView
+            android:id="@+id/pendValorPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0,00"
+            app:layout_constraintTop_toBottomOf="@id/pendentePessoal"
+            android:gravity="center"
+            android:autoSizeTextType="uniform"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="40dp" />
+
+        <TextView
+            android:id="@+id/pagoPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pago:"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/pendValorPessoal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="76dp" />
+
+        <TextView
+            android:id="@+id/pagValorPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0,00"
+            android:gravity="center"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/pagoPessoal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="116dp" />
+
+        <TextView
+            android:id="@+id/totalPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total:"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/pagValorPessoal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="137dp" />
+
+        <TextView
+            android:id="@+id/totalValorPessoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0,00"
+            android:gravity="center"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/totalPessoal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="173dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cardSala"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_resumo"
+        android:padding="10dp"
+        android:layout_marginTop="60dp"
+        android:elevation="10dp"
+        app:layout_constraintWidth_percent="0.30"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cardPessoal"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tituloSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Sala:"
+            android:textColor="@color/roxoEscrita"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/pendenteSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pendente:"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tituloSala" />
+
+        <TextView
+            android:id="@+id/pendValorSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:text="0,00"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pendenteSala" />
+
+        <TextView
+            android:id="@+id/pagoSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pago:"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pendValorSala" />
+
+        <TextView
+            android:id="@+id/pagValorSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0,00"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pagoSala" />
+
+        <TextView
+            android:id="@+id/totalSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Total:"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pagValorSala" />
+
+        <TextView
+            android:id="@+id/pagoValorSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0,00"
+            android:gravity="center"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/totalSala"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="164dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/btns"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:divider="@drawable/padding_14dp"
+        android:showDividers="middle"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/cardPessoal">
+
+        <Button
+            android:id="@+id/criarDespesa"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="Criar despesa"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:paddingHorizontal="8dp"
+            app:backgroundTint="@color/roxoBtn"
+            app:rippleColor="#20FFFFFF" />
+
+        <Button
+            android:id="@+id/codigoSala"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:paddingHorizontal="8dp"
+            android:text="Código da sala"
+            android:textColor="@color/roxoEscrita"
+            android:textSize="14sp"
+            app:backgroundTint="@color/fundoClaro"
+            app:rippleColor="#207467CA" />
+
+        <TextView
+            android:id="@+id/data"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="00/00/0000"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/btns"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/menu">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tituloConfirmar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirmar transferências"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/black"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <TextView
+                android:id="@+id/subTituloConfirmar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Alguém avisou que transferiu pra você"
+                android:textSize="12sp"
+                android:layout_marginStart="20dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:textColor="@color/black"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listaConfirmar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="10dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_confirmacao"
+                android:visibility="gone"
+                tools:visibility="visible"
+                />
+
+
+            <TextView
+                android:id="@+id/tituloTransferir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Você precisa transferir"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/black"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/subTituloTransferir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Envie o Pix para quem vai pagar a conta"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:layout_marginStart="20dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listaTransferir"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_transferir"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="10dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <TextView
+                android:id="@+id/tituloResponsavel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Você é responsável por pagar"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/black"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <TextView
+                android:id="@+id/subTituloResponsavel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Os outros te transferem, e você paga a conta"
+                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:layout_marginStart="20dp"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listaResponsavel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_responsavel"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="10dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/menu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        app:itemPaddingTop="4dp"
+        app:itemPaddingBottom="4dp"
+        android:background="@color/fundoClaro"
+        app:itemIconTint="@color/black"
+        app:itemTextColor="@color/black"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu"
+        app:itemActiveIndicatorStyle="@style/PilulaAba"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
