@@ -186,42 +186,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <View
-            android:id="@+id/view"
-            android:layout_width="170dp"
-            android:layout_height="62dp"
-            android:background="@drawable/borda_arredondada"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.182"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView10"
-            app:layout_constraintVertical_bias="0.036" />
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="48dp"
-            android:layout_height="42dp"
-            android:layout_marginTop="27dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/view"
-            app:layout_constraintHorizontal_bias="0.057"
-            app:layout_constraintStart_toStartOf="@+id/view"
-            app:layout_constraintTop_toTopOf="@+id/textView10"
-            app:layout_constraintVertical_bias="0.056"
-            app:srcCompat="@drawable/circulo_usuario" />
-
-        <TextView
-            android:id="@+id/textView11"
-            android:layout_width="62dp"
-            android:layout_height="16dp"
-            android:text="Fulano Silva"
-            android:textSize="11dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textView10"
-            app:layout_constraintVertical_bias="0.14"
-            tools:layout_editor_absoluteX="106dp" />
-
         <Button
             android:id="@+id/button2"
             android:layout_width="197dp"
@@ -235,17 +199,13 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.952" />
 
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pendente"
-            android:textColor="#DE8E8A8A"
-            android:textSize="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/view"
-            app:layout_constraintTop_toTopOf="@+id/view"
-            app:layout_constraintVertical_bias="0.725"
-            tools:layout_editor_absoluteX="106dp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="192dp"
+            android:layout_height="147dp"
+            tools:layout_editor_absoluteX="33dp"
+            tools:layout_editor_absoluteY="315dp">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
