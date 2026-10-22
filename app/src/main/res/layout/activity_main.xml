@@ -182,9 +182,10 @@
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.126"
+            app:layout_constraintHorizontal_bias="0.087"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.498" />
 
         <Button
             android:id="@+id/button2"
@@ -199,13 +200,16 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.952" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="192dp"
-            android:layout_height="147dp"
-            tools:layout_editor_absoluteX="33dp"
-            tools:layout_editor_absoluteY="315dp">
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_usuario"
+            android:layout_width="match_parent"
+            android:layout_height="206dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.798"
+            tools:itemCount="6"
+            tools:layout_editor_absoluteX="0dp"
+            tools:listitem="@layout/teste" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
