@@ -466,7 +466,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@color/fundoClaro"
-        android:paddingTop="9dp"
+        android:paddingTop="10dp"
         android:paddingBottom="9dp">
 
             <TextView
@@ -476,6 +476,7 @@
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
+                android:minHeight="48dp"
                 app:drawableTopCompat="@drawable/inicio"
                 android:text="Início"
                 android:gravity="center"
@@ -494,6 +495,7 @@
             app:drawableTopCompat="@drawable/historico"
             android:text="Histórico"
             android:gravity="center"
+            android:minHeight="48dp"
             android:stateListAnimator="@animator/pressionar_card"
             android:textColor="@color/black"
             android:drawableTint="@color/black"
