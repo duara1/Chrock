@@ -7,7 +7,4 @@
 
     <style name="Theme.Chrock" parent="Base.Theme.Chrock" />
 
-    <style name="PilulaAba" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@color/roxoPilula</item>
-    </style>
 </resources>

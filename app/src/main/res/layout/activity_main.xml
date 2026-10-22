@@ -333,7 +333,7 @@
         app:layout_constraintTop_toBottomOf="@id/btns"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/menu">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -455,26 +455,49 @@
                 android:orientation="horizontal"
                 android:visibility="gone"
                 tools:visibility="visible"/>
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/menu"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:minHeight="56dp"
-        app:itemPaddingTop="4dp"
-        app:itemPaddingBottom="4dp"
-        android:background="@color/fundoClaro"
-        app:itemIconTint="@color/black"
-        app:itemTextColor="@color/black"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu"
-        app:itemActiveIndicatorStyle="@style/PilulaAba"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@color/fundoClaro"
+        android:paddingTop="9dp"
+        android:paddingBottom="9dp">
 
+            <TextView
+                android:id="@+id/abaInicio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                app:drawableTopCompat="@drawable/inicio"
+                android:text="Início"
+                android:gravity="center"
+                android:stateListAnimator="@animator/pressionar_card"
+                android:textColor="@color/black"
+                android:drawableTint="@color/black"
+                android:textSize="13sp"/>
+
+        <TextView
+            android:id="@+id/abaHistorico"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            app:drawableTopCompat="@drawable/historico"
+            android:text="Histórico"
+            android:gravity="center"
+            android:stateListAnimator="@animator/pressionar_card"
+            android:textColor="@color/black"
+            android:drawableTint="@color/black"
+            android:textSize="13sp"/>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
 
