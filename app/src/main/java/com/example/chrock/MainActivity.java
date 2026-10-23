@@ -7,12 +7,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.chrock.recycleview.adapter.UsuarioAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private RecyclerView recyclerUsuarios;
+    private UsuarioAdapter usuario;
+    private List<Usuario> listaUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +30,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        recyclerUsuarios = findViewById(R.id.rv_usuario);
 
-        List<Usuario> listaUsuarios = new ArrayList<>();
-        listaUsuarios.add(new Usuario("Clovis"));
+        listaUsuario = new ArrayList<>();
+        listaUsuario.add(new Usuario("SmileMarkus"));
 
-        RecyclerView recyclerView = findViewById(R.id.rv_usuario);
+        usuario = new UsuarioAdapter(listaUsuario);
+
+        recyclerUsuarios.setLayoutManager(new LinearLayoutManager(this));
+        recyclerUsuarios.setAdapter(usuario);
 
     }
+
+
 }
