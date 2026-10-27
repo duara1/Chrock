@@ -5,8 +5,8 @@ public class Contribuicao {
     private StatusContribuicao status;
 
     public Contribuicao(int usuarioId) {
-        this.status = StatusContribuicao.PENDENTE;
         this.usuarioId = usuarioId;
+        this.status = StatusContribuicao.PENDENTE;
     }
 
     public StatusContribuicao getStatus() {
