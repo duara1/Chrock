@@ -1,45 +1,45 @@
 package com.example.chrock.model;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Sala {
-    private int id;
-    private int ADMId;
+    private String id;
+    private String codigo;
+    private String ADMId;
     private String titulo;
     private String descricao;
-    private String codigo;
     private String img;
-    private Map<Integer, Papel> membros = new LinkedHashMap<>();
+    private Map<String, Papel> membros = new HashMap<>();
 
-    public Sala(int ADMId, String codigo, int id, String descricao, String titulo) {
-        this.ADMId = ADMId;
-        this.codigo = codigo;
+    public Sala(String id, String codigo, String ADMId, String titulo, String descricao) {
         this.id = id;
-        this.descricao = descricao;
+        this.codigo = codigo;
+        this.ADMId = ADMId;
         this.titulo = titulo;
+        this.descricao = descricao;
         membros.put(ADMId, Papel.ADM);
     }
 
-    public void setMembrosPapel(int usuarioId, Papel papel){
-        if (membros.containsKey(usuarioId)){
-            membros.replace(usuarioId, papel);
-        } else {
-            throw new IllegalArgumentException("essa pessoa já está na sala.");
+    public void setMembrosPapel(String usuarioId, Papel papel) {
+        if (!membros.containsKey(usuarioId)) {
+            throw new IllegalArgumentException("Essa pessoa não está na sala.");
         }
+        if (usuarioId == ADMId) {
+            throw new IllegalArgumentException("O ADM não pode ter o papel alterado.");
+        }
+        membros.put(usuarioId, papel);
     }
 
-    public Papel getPapel(int usuarioId){
+    public Papel getPapel(String usuarioId){
         if (membros.containsKey(usuarioId)){
             return membros.get(usuarioId);
         }
         throw new IllegalArgumentException("Usuário não encontrado");
     }
 
-    public boolean isMembro(int usuarioId){
+    public boolean isMembro(String usuarioId){
         if (membros.containsKey(usuarioId)){
             return true;
         } else {
@@ -47,7 +47,7 @@ public class Sala {
         }
     }
 
-    public void adicionarMembro(int usuarioId){
+    public void adicionarMembro(String usuarioId){
         if (membros.containsKey(usuarioId)){
             throw new IllegalArgumentException("essa pessoa já está na sala.");
         } else {
@@ -55,11 +55,12 @@ public class Sala {
         }
     }
 
-    public Map<Integer, Papel> getMembros(){
+    public Map<String, Papel> getMembros(){
+
         return Collections.unmodifiableMap(membros);
     }
 
-    public int getADMId() {
+    public String getADMId() {
         return ADMId;
     }
 
@@ -71,7 +72,7 @@ public class Sala {
         return descricao;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

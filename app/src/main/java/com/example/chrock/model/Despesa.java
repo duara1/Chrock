@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class  Despesa {
-    private int despesaId;
+    private String despesaId;
     private String salaId;
-    private int responsavelId;
+    private String responsavelId;
     private String titulo;
     private int totalEmInt;
     private String vencimento;
@@ -14,7 +14,7 @@ public class  Despesa {
     private List<Contribuicao> contribuintes;
     private String comprovante;
 
-    public Despesa(List<Contribuicao> contribuentes, String chavePix, int despesaId, int responsavelId, String salaId, String titulo, int totalEmInt, String vencimento) {
+    public Despesa(List<Contribuicao> contribuentes, String chavePix, String despesaId, String responsavelId, String salaId, String titulo, int totalEmInt, String vencimento) {
         this.contribuintes = new ArrayList<>(contribuentes);
         this.chavePix = chavePix;
         this.despesaId = despesaId;
@@ -25,14 +25,21 @@ public class  Despesa {
         this.vencimento = vencimento;
     }
 
-    private int getValorATransferirEmInt(){
+    public int getValorATransferirEmInt(){
         int pessoas = contribuintes.size();
         if (pessoas < 1) return 0;
         return (totalEmInt + pessoas - 1) / pessoas;
     }
 
-    private int getMetaDeRecebimento(){
-        int outros = contribuintes.size() - ((contribuintes.contains(responsavelId)) ? 1 : 0);
+    public boolean isResponsavelContribui() {
+        for (Contribuicao c : contribuintes) {
+            if (c.getUsuarioId().equals(responsavelId)) return true;
+        }
+        return false;
+    }
+
+    public int getMetaDeRecebimento() {
+        int outros = contribuintes.size() - (isResponsavelContribui() ? 1 : 0);
         return getValorATransferirEmInt() * outros;
     }
 
@@ -48,11 +55,11 @@ public class  Despesa {
         return contribuintes;
     }
 
-    public int getDespesaId() {
+    public String getDespesaId() {
         return despesaId;
     }
 
-    public int getResponsavelId() {
+    public String getResponsavelId() {
         return responsavelId;
     }
 

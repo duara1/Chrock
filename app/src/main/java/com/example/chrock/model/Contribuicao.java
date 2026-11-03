@@ -1,10 +1,10 @@
 package com.example.chrock.model;
 
 public class Contribuicao {
-    private int usuarioId;
+    private String usuarioId;
     private StatusContribuicao status;
 
-    public Contribuicao(int usuarioId) {
+    public Contribuicao(String usuarioId) {
         this.usuarioId = usuarioId;
         this.status = StatusContribuicao.PENDENTE;
     }
@@ -13,7 +13,7 @@ public class Contribuicao {
         return status;
     }
 
-    public int getUsuarioId() {
+    public String getUsuarioId() {
         return usuarioId;
     }
 
