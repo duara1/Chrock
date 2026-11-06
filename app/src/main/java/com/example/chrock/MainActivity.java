@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        findViewById(R.id.botaoCadastrar).setOnClickListener(view ->{
+        findViewById(R.id.textoCadastrar).setOnClickListener(view ->{
             Intent intent = new Intent(MainActivity.this, Cadastrar.class);
             startActivity(intent);
         });
