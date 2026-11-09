@@ -1,0 +1,79 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#202020">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:orientation="vertical"
+        android:background="#78D15B"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/botaoVoltar"
+            android:layout_width="46dp"
+            android:layout_height="45dp"
+            android:gravity="center"
+            android:text="↶"
+            android:textColor="#174D20"
+            android:textSize="32sp"
+            android:contentDescription="Voltar"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notificações"
+            android:textColor="#174D20"
+            android:textSize="21sp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="18dp">
+
+        <TextView
+            android:id="@+id/contadorNotificacoes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0 notificações não lidas"
+            android:textColor="#222222"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/botaoMarcarTodas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marcar todas como lidas"
+            android:textAllCaps="false"
+            android:textColor="#174D20"
+            android:backgroundTint="#78D15B"/>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/conteudoNotificacoes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp"/>
+
+    </ScrollView>
+
+</LinearLayout>

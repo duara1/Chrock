@@ -11,9 +11,29 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Chrock">
+        <<activity
+        android:name=".HistoricoActivity"
+        android:exported="false"/>
+
         <activity
-            android:name=".HistoricoActivity"
-            android:exported="false" />
+            android:name=".HistoricoContaActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".HistoricoSalaActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".ResumoPessoalActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".ResumoSalaActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".NotificacoesActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".MainActivity"
@@ -25,10 +45,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Cadastrar"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>
