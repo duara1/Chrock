@@ -14,20 +14,33 @@ public class  Despesa {
     private List<Contribuicao> contribuintes;
     private String comprovante;
 
-    public Despesa(List<Contribuicao> contribuentes, String chavePix, String despesaId, String responsavelId, String salaId, String titulo, int totalEmInt, String vencimento) {
-        this.contribuintes = new ArrayList<>(contribuentes);
-        this.chavePix = chavePix;
+    public Despesa(String despesaId, String salaId, String responsavelId, String titulo, int totalEmInt, String vencimento, String chavePix, List<String> contribuentes) {
         this.despesaId = despesaId;
-        this.responsavelId = responsavelId;
         this.salaId = salaId;
+        this.responsavelId = responsavelId;
         this.titulo = titulo;
         this.totalEmInt = totalEmInt;
         this.vencimento = vencimento;
+        this.chavePix = chavePix;
+
+        if (contribuentes == null || contribuentes.isEmpty()){
+            throw new IllegalArgumentException("Escolha pelo menos 1 contribuente");
+        }
+        this.contribuintes = new ArrayList<>();
+        for (String id:contribuentes) {
+            this.contribuintes.add(new Contribuicao(id));
+        }
     }
 
-    public int getValorATransferirEmInt(){
+    public int getValorATransferirEmInt(String usuarioId){
         int pessoas = contribuintes.size();
-        if (pessoas < 1) return 0;
+        if (pessoas < 1) throw new IllegalArgumentException("ERRO: Ningem em contribuentes. - getValorATransferirEmInt");
+        if (usuarioId.equals(responsavelId) && !isContribuente(usuarioId)) return 0;
+        return (totalEmInt + pessoas - 1) / pessoas;
+    }
+
+    public int getValorTransferirAConfirmar(){
+        int pessoas = contribuintes.size();
         return (totalEmInt + pessoas - 1) / pessoas;
     }
 
@@ -40,7 +53,47 @@ public class  Despesa {
 
     public int getMetaDeRecebimento() {
         int outros = contribuintes.size() - (isResponsavelContribui() ? 1 : 0);
-        return getValorATransferirEmInt() * outros;
+        return ((totalEmInt + contribuintes.size() - 1) / contribuintes.size()) * outros;
+    }
+
+    public void mudarStatus(String usuarioId, StatusContribuicao status){
+        if(isContribuente(usuarioId)){
+            for (Contribuicao c: contribuintes) {
+                if (c.getUsuarioId().equals(usuarioId)){
+                    c.setStatus(status);
+                    return;
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Usuário não encontrado.");
+        }
+    }
+
+    public StatusContribuicao getStatus(String usuarioId){
+        if (isContribuente(usuarioId)){
+            for (Contribuicao c: contribuintes) {
+                if (c.getUsuarioId().equals(usuarioId)){
+                    return c.getStatus();
+                }
+            }
+        }
+        throw new IllegalArgumentException("Erro: getStatus - Despesa");
+    }
+
+    public Boolean isContribuente(String usuarioId){
+        for (int i = 0;  i < contribuintes.size() ; i++){
+            if (contribuintes.get(i).getUsuarioId().equals(usuarioId))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean isConcluida(){
+        if (comprovante != null && !comprovante.trim().isEmpty()){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public String getChavePix() {
@@ -51,7 +104,7 @@ public class  Despesa {
         return comprovante;
     }
 
-    public List<Contribuicao> getContribuentes() {
+    public List<Contribuicao> getContribuintes() {
         return contribuintes;
     }
 
