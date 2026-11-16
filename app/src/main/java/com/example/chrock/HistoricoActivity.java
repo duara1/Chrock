@@ -100,8 +100,21 @@ public class HistoricoActivity extends AppCompatActivity {
         adicionarTitulo("Contas com sua participação");
         List<Conta> contas = HistoricoRepositorioAdapter.contasDoUsuario(
                 repositorio, salaId, usuarioId);
-        List<Conta> filtradas = FiltroHistorico.filtrar(contas, repositorio, usuarioId,
-                filtroPeriodo.getSelectedItem().toString(), filtroStatus.getSelectedItem().toString());
+        List<Conta> filtradas = String periodoSelecionado = filtroPeriodo.getSelectedItem() != null
+                                        ? filtroPeriodo.getSelectedItem().toString()
+                                        : "Todos os meses";
+
+                                String statusSelecionado = filtroStatus.getSelectedItem() != null
+                                        ? filtroStatus.getSelectedItem().toString()
+                                        : "Todos os status";
+
+                                List<Conta> filtradas = FiltroHistorico.filtrar(
+                                        contas,
+                                        repositorio,
+                                        usuarioId,
+                                        periodoSelecionado,
+                                        statusSelecionado
+                                );
         if (filtradas.isEmpty()) {
             adicionarVazio(contas.isEmpty() ? "Você ainda não participa de nenhuma conta."
                     : "Nenhuma conta encontrada para os filtros selecionados.");
