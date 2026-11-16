@@ -1,14 +1,20 @@
 package com.example.chrock;
 
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chrock.Adapter.ConfirmacaoAdapter;
+import com.example.chrock.Adapter.responsavelAdapter;
+import com.example.chrock.Adapter.transferenciaAdapter;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.repositorio.RepositorioFalso;
 
@@ -28,22 +34,37 @@ public class MainActivity extends AppCompatActivity {
         });
 
         RepositorioFalso repo = RepositorioFalso.get();
-        String[] pessoas = {"u1", "u2", "u3"};
+        String usuarioId = "u2";
+        String salaId = "s1";
 
-        for (String id: pessoas) {
-            Log.d("Teste", "======" + repo.getUsuario(id).getNome() + "======");
+        //CONFIRMAR
+        List<RepositorioFalso.ItemConfirmacao> aConfirmar = repo.aConfirmar(usuarioId, salaId);
+        RecyclerView listaConfirmacao = findViewById(R.id.listaConfirmar);
+        listaConfirmacao.setAdapter(new ConfirmacaoAdapter(aConfirmar));
 
-            for (RepositorioFalso.ItemConfirmacao c: repo.aConfirmar(id, "s1")) {
-                Log.d("aConfirmar", repo.getUsuario(c.usuarioId).getNome() + "\nTranferiu: " + c.despesa.getValorTransferirAConfirmar() + "\nDe:" + c.despesa.getTitulo());
-            }
+        int visiConfirmar = aConfirmar.isEmpty() ? View.GONE : View.VISIBLE;
+        findViewById(R.id.tituloConfirmar).setVisibility(visiConfirmar);
+        findViewById(R.id.subTituloConfirmar).setVisibility(visiConfirmar);
+        listaConfirmacao.setVisibility(visiConfirmar);
 
-            for (Despesa t: repo.aTransferir(id, "s1")) {
-                Log.d("aTransferir", t.getTitulo() + "\nTransferir: " + t.getValorATransferirEmInt(id) + "\nPara: " + t.getResponsavelId());
-            }
+        //TRANSFERIR
+        List<Despesa> aTransferir = repo.aTransferir(usuarioId, salaId);
+        RecyclerView listaTranferencia = findViewById(R.id.listaTransferir);
+        listaTranferencia.setAdapter(new transferenciaAdapter(aTransferir));
 
-            for (Despesa r: repo.souResponsavel(id, "s1")) {
-                Log.d("souResponsavel", r.getTitulo() + "\nTotal: " + r.getTotalEmInt() + "\nSua parte: " + r.getValorATransferirEmInt(id) + "\nMeta de recebimento: " + r.getMetaDeRecebimento() + "\n" + r.getContribuintes().size() + "contribuentes");
-            }
-        }
+        int visiTransferencia = aTransferir.isEmpty() ? View.GONE : View.VISIBLE;
+        findViewById(R.id.tituloTransferir).setVisibility(visiTransferencia);
+        findViewById(R.id.subTituloTransferir).setVisibility(visiTransferencia);
+        listaTranferencia.setVisibility(visiTransferencia);
+
+        //RESPONSAVEL
+        List<Despesa> responsavel = repo.souResponsavel(usuarioId, salaId);
+        RecyclerView listaResponsavel = findViewById(R.id.listaResponsavel);
+        listaResponsavel.setAdapter(new responsavelAdapter(responsavel));
+
+        int visiResponsavel = responsavel.isEmpty() ? View.GONE : View.VISIBLE;
+        findViewById(R.id.tituloResponsavel).setVisibility(visiResponsavel);
+        findViewById(R.id.subTituloResponsavel).setVisibility(visiResponsavel);
+        listaResponsavel.setVisibility(visiResponsavel);
     }
 }
