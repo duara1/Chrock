@@ -4,7 +4,6 @@ package com.example.chrock;
 import android.os.Bundle;
 import android.content.Intent;
 import android.graphics.Color;
-import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Spinner;
