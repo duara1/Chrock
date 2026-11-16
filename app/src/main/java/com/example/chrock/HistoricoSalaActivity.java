@@ -8,7 +8,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.chrock.data.DadosManager;
+import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.model.Despesa;
+import com.example.chrock.model.Contribuicao;
+import com.example.chrock.model.Usuario;
+import com.example.chrock.model.StatusContribuicao;
 import com.example.chrock.model.Conta;
 import com.example.chrock.model.Pagamento;
 
@@ -24,7 +28,7 @@ public class HistoricoSalaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historico_sala);
 
-        DadosManager.inicializar(this);
+
 
         findViewById(R.id.botaoVoltar)
                 .setOnClickListener(v -> finish());
@@ -44,87 +48,38 @@ public class HistoricoSalaActivity extends AppCompatActivity {
     }
 
     private void carregarHistorico() {
-
         conteudo.removeAllViews();
-
-        adicionarTitulo("Histórico de pagamentos da sala");
-
-        ArrayList<Pagamento> pagamentos =
-                DadosManager.getHistoricoPagamentosSala(this);
-
-        if (pagamentos.isEmpty()) {
-            adicionarTexto("Nenhum pagamento registrado.");
-            return;
+        RepositorioFalso repo = RepositorioFalso.get();
+        String salaId = getIntent().getStringExtra("sala_id");
+        adicionarTitulo("Contribuições da sala");
+        if (salaId == null || repo.getSala(salaId) == null) {
+            adicionarTexto("Selecione uma sala válida."); return;
         }
-
-        double totalConfirmado = 0;
-        double totalAguardando = 0;
-
-        for (Pagamento pagamento : pagamentos) {
-
-            if (pagamento.isConfirmado()) {
-                totalConfirmado += pagamento.getValor();
-            } else {
-                totalAguardando += pagamento.getValor();
+        java.util.List<Despesa> despesas = repo.getDespesasDaSala(salaId);
+        if (despesas.isEmpty()) { adicionarTexto("Nenhuma despesa nesta sala."); return; }
+        int confirmadas = 0, sinalizadas = 0, pendentes = 0, contestadas = 0;
+        for (Despesa despesa : despesas) {
+            LinearLayout card = criarCard();
+            card.addView(criarTexto(despesa.getTitulo(), 18, "#222222", true));
+            card.addView(criarTexto("Total: " + formatarValor(despesa.getTotalEmInt() / 100.0), 15, "#555555", false));
+            for (Contribuicao contribuicao : despesa.getContribuintes()) {
+                StatusContribuicao status = contribuicao.getStatus();
+                if (status == StatusContribuicao.CONFIRMADO) confirmadas++;
+                else if (status == StatusContribuicao.SINALIZADO) sinalizadas++;
+                else if (status == StatusContribuicao.CONTESTADO) contestadas++;
+                else pendentes++;
+                Usuario usuario = repo.getUsuario(contribuicao.getUsuarioId());
+                String nome = usuario == null ? contribuicao.getUsuarioId() : usuario.getNome();
+                card.addView(criarTexto(nome + ": " + status.name(), 14, "#555555", false));
             }
-
-            adicionarCard(pagamento);
+            conteudo.addView(card);
         }
-
-        adicionarTitulo("Resumo");
-
-        adicionarInfo(
-                "Pagamentos confirmados",
-                formatarValor(totalConfirmado)
-        );
-
-        adicionarInfo(
-                "Aguardando confirmação",
-                formatarValor(totalAguardando)
-        );
-    }
-
-    private void adicionarCard(Pagamento pagamento) {
-
-        LinearLayout card = criarCard();
-
-        Conta conta = DadosManager.buscarConta(
-                this, pagamento.getContaId()
-        );
-
-        String nomeConta = conta != null
-                ? conta.getNome()
-                : "Conta não encontrada";
-
-        card.addView(criarTexto(
-                nomeConta, 18, "#222222", true
-        ));
-
-        card.addView(criarTexto(
-                "Pago por: " + pagamento.getPagador(),
-                14, "#555555", false
-        ));
-
-        card.addView(criarTexto(
-                "Data: " + pagamento.getData(),
-                14, "#555555", false
-        ));
-
-        card.addView(criarTexto(
-                "Valor: " + formatarValor(pagamento.getValor()),
-                16, "#222222", true
-        ));
-
-        card.addView(criarTexto(
-                pagamento.isConfirmado()
-                        ? "Confirmado"
-                        : "Aguardando confirmação",
-                14,
-                pagamento.isConfirmado() ? "#478B37" : "#C77B22",
-                true
-        ));
-
-        conteudo.addView(card);
+        adicionarTitulo("Resumo dos status");
+        adicionarInfo("Confirmadas", String.valueOf(confirmadas));
+        adicionarInfo("Sinalizadas", String.valueOf(sinalizadas));
+        adicionarInfo("Pendentes", String.valueOf(pendentes));
+        adicionarInfo("Contestadas", String.valueOf(contestadas));
+        adicionarTexto("Contagens de contribuições, não valores efetivamente pagos.");
     }
 
     private void adicionarTitulo(String titulo) {

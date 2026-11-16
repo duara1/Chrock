@@ -27,7 +27,17 @@ public class ModulosYasminActivity extends AppCompatActivity {
     private void adicionar(LinearLayout menu, String titulo, Class<?> destino) {
         Button botao = new Button(this);
         botao.setText(titulo);
-        botao.setOnClickListener(v -> startActivity(new Intent(this, destino)));
+        botao.setOnClickListener(v -> {
+            Intent intent = new Intent(this, destino);
+            if (destino == HistoricoActivity.class || destino == HistoricoContaActivity.class
+                    || destino == HistoricoSalaActivity.class) {
+                // Identidade de demonstração existente no RepositorioFalso.
+                // A navegação definitiva deverá fornecer os IDs da sessão e da sala.
+                intent.putExtra(HistoricoActivity.EXTRA_USUARIO_ID, "u1");
+                intent.putExtra(HistoricoActivity.EXTRA_SALA_ID, "s1");
+            }
+            startActivity(intent);
+        });
         menu.addView(botao);
     }
 }

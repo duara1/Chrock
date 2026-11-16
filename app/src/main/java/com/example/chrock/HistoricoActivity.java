@@ -2,69 +2,119 @@
 package com.example.chrock;
 
 import android.os.Bundle;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import com.example.chrock.integracao.FiltroHistorico;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.chrock.data.DadosManager;
+import com.example.chrock.integracao.HistoricoRepositorioAdapter;
+import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.model.Despesa;
+import com.example.chrock.model.StatusContribuicao;
 import com.example.chrock.model.Conta;
-import com.example.chrock.model.Pagamento;
 
-import java.util.ArrayList;
+
+import java.util.List;
 import java.util.Locale;
 
 public class HistoricoActivity extends AppCompatActivity {
 
     private LinearLayout conteudo;
-    private final String usuario = "Você";
+    private Spinner filtroPeriodo;
+    private Spinner filtroStatus;
+    public static final String EXTRA_USUARIO_ID = "usuario_id";
+    public static final String EXTRA_SALA_ID = "sala_id";
+    private String usuarioId;
+    private String salaId;
+    private RepositorioFalso repositorio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historico);
 
-        DadosManager.inicializar(this);
+        usuarioId = getIntent().getStringExtra(EXTRA_USUARIO_ID);
+        salaId = getIntent().getStringExtra(EXTRA_SALA_ID);
+        repositorio = RepositorioFalso.get();
 
         findViewById(R.id.botaoVoltar)
                 .setOnClickListener(v -> finish());
 
         conteudo = findViewById(R.id.conteudoHistorico);
-
+        filtroPeriodo = findViewById(R.id.filtroPeriodo);
+        filtroStatus = findViewById(R.id.filtroStatus);
+        configurarFiltros();
         carregarHistorico();
     }
 
-    private void carregarHistorico() {
+    private void configurarFiltros() {
+        List<String> periodos = new ArrayList<>();
+        periodos.add("Todos os meses");
+        if (usuarioId != null && salaId != null && repositorio.getSala(salaId) != null
+                && repositorio.getSala(salaId).isMembro(usuarioId)) {
+            Set<String> meses = new LinkedHashSet<>();
+            for (Conta conta : HistoricoRepositorioAdapter.contasDoUsuario(repositorio, salaId, usuarioId)) {
+                String data = conta.getVencimento();
+                if (data != null && data.matches("\\d{2}/\\d{2}/\\d{4}")) {
+                    meses.add(data.substring(3));
+                }
+            }
+            periodos.addAll(meses);
+        }
+        filtroPeriodo.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, periodos));
+        String[] status = {"Todos os status", "Pendente", "Sinalizado", "Confirmado", "Contestado"};
+        filtroStatus.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, status));
+        AdapterView.OnItemSelectedListener listener = new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, android.view.View view,
+                                                  int position, long id) { carregarHistorico(); }
+            @Override public void onNothingSelected(AdapterView<?> parent) { }
+        };
+        filtroPeriodo.setOnItemSelectedListener(listener);
+        filtroStatus.setOnItemSelectedListener(listener);
+    }
 
+    private void carregarHistorico() {
         conteudo.removeAllViews();
+        if (usuarioId == null || salaId == null) {
+            adicionarVazio("Selecione uma sala e um usuário para consultar o histórico.");
+            return;
+        }
+        if (repositorio.getUsuario(usuarioId) == null || repositorio.getSala(salaId) == null
+                || !repositorio.getSala(salaId).isMembro(usuarioId)) {
+            adicionarVazio("Usuário ou sala inválidos.");
+            return;
+        }
 
         adicionarTitulo("Contas com sua participação");
-
-        ArrayList<Conta> contas =
-                DadosManager.getHistoricoPessoal(this, usuario);
-
-        if (contas.isEmpty()) {
-            adicionarVazio("Você ainda não participa de nenhuma conta.");
+        List<Conta> contas = HistoricoRepositorioAdapter.contasDoUsuario(
+                repositorio, salaId, usuarioId);
+        List<Conta> filtradas = FiltroHistorico.filtrar(contas, repositorio, usuarioId,
+                filtroPeriodo.getSelectedItem().toString(), filtroStatus.getSelectedItem().toString());
+        if (filtradas.isEmpty()) {
+            adicionarVazio(contas.isEmpty() ? "Você ainda não participa de nenhuma conta."
+                    : "Nenhuma conta encontrada para os filtros selecionados.");
         } else {
-            for (Conta conta : contas) {
-                adicionarCardConta(conta);
+            for (Conta conta : filtradas) {
+                Despesa despesa = repositorio.getDespesa(conta.getId());
+                adicionarCardConta(conta, despesa.getStatus(usuarioId));
             }
         }
-
-        adicionarTitulo("Seus pagamentos");
-
-        ArrayList<Pagamento> pagamentos =
-                DadosManager.getPagamentosPessoais(this, usuario);
-
-        if (pagamentos.isEmpty()) {
-            adicionarVazio("Nenhum pagamento registrado.");
-        } else {
-            for (Pagamento pagamento : pagamentos) {
-                adicionarCardPagamento(pagamento);
-            }
-        }
+        adicionarTitulo("Pagamentos");
+        adicionarVazio("Datas, valores pagos e confirmações individuais serão exibidos "
+                + "quando houver registros de pagamento integrados. "
+                + "Os status das contribuições aparecem nas contas acima.");
     }
 
     private void adicionarTitulo(String titulo) {
@@ -83,7 +133,7 @@ public class HistoricoActivity extends AppCompatActivity {
         conteudo.addView(texto);
     }
 
-    private void adicionarCardConta(Conta conta) {
+    private void adicionarCardConta(Conta conta, StatusContribuicao status) {
 
         LinearLayout card = criarCard();
 
@@ -110,55 +160,23 @@ public class HistoricoActivity extends AppCompatActivity {
                 16, "#222222", true
         ));
 
-        card.addView(criarTexto(
-                conta.isPaga() ? "Paga" : "Pendente",
-                14,
-                conta.isPaga() ? "#478B37" : "#C77B22",
-                true
-        ));
+        String descricao;
+        switch (status) {
+            case CONFIRMADO: descricao = "Contribuição confirmada"; break;
+            case SINALIZADO: descricao = "Pagamento sinalizado"; break;
+            case CONTESTADO: descricao = "Contribuição contestada"; break;
+            default: descricao = "Contribuição pendente";
+        }
+        card.addView(criarTexto(descricao, 14,
+                status == StatusContribuicao.CONFIRMADO ? "#478B37" : "#C77B22", true));
 
-        conteudo.addView(card);
-    }
-
-    private void adicionarCardPagamento(Pagamento pagamento) {
-
-        LinearLayout card = criarCard();
-
-        Conta conta = DadosManager.buscarConta(
-                this, pagamento.getContaId()
-        );
-
-        String nomeConta = conta != null
-                ? conta.getNome()
-                : "Conta não encontrada";
-
-        card.addView(criarTexto(
-                nomeConta, 17, "#222222", true
-        ));
-
-        card.addView(criarTexto(
-                "Data: " + pagamento.getData(),
-                14, "#555555", false
-        ));
-
-        card.addView(criarTexto(
-                "Valor pago: R$ " + String.format(
-                        Locale.forLanguageTag("pt-BR"),
-                        "%,.2f",
-                        pagamento.getValor()
-                ),
-                15, "#222222", true
-        ));
-
-        card.addView(criarTexto(
-                pagamento.isConfirmado()
-                        ? "Pagamento confirmado"
-                        : "Aguardando confirmação",
-                14,
-                pagamento.isConfirmado() ? "#478B37" : "#C77B22",
-                true
-        ));
-
+        card.setOnClickListener(v -> {
+            Intent detalhe = new Intent(this, HistoricoContaActivity.class);
+            detalhe.putExtra("contaId", conta.getId());
+            detalhe.putExtra(EXTRA_USUARIO_ID, usuarioId);
+            detalhe.putExtra(EXTRA_SALA_ID, salaId);
+            startActivity(detalhe);
+        });
         conteudo.addView(card);
     }
 
