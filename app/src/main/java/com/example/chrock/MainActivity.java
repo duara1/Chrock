@@ -19,35 +19,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        // Resumo pessoal
-        findViewById(R.id.btnResumoPessoal)
-                .setOnClickListener(v ->
-                        abrirTela(ResumoPessoalActivity.class));
-
-// Resumo da sala
-        findViewById(R.id.btnResumoSala)
-                .setOnClickListener(v ->
-                        abrirTela(ResumoSalaActivity.class));
-
-// Histórico pessoal
-        findViewById(R.id.btnHistoricoPessoal)
-                .setOnClickListener(v ->
-                        abrirTela(HistoricoActivity.class));
-
-// Histórico por conta
-        findViewById(R.id.btnHistoricoConta)
-                .setOnClickListener(v ->
-                        abrirTela(HistoricoContaActivity.class));
-
-// Histórico da sala
-        findViewById(R.id.btnHistoricoSala)
-                .setOnClickListener(v ->
-                        abrirTela(HistoricoSalaActivity.class));
-
-// Notificações
-        findViewById(R.id.btnNotificacoes)
-                .setOnClickListener(v ->
-                        abrirTela(NotificacoesActivity.class));
+        // Acesso temporário para testar os módulos antes da integração com a main.
+        findViewById(R.id.botaoTestarModulos).setOnClickListener(v ->
+                abrirTela(ModulosYasminActivity.class));
         DadosManager.inicializar(this);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
