@@ -100,28 +100,32 @@ public class HistoricoActivity extends AppCompatActivity {
         adicionarTitulo("Contas com sua participação");
         List<Conta> contas = HistoricoRepositorioAdapter.contasDoUsuario(
                 repositorio, salaId, usuarioId);
-        List<Conta> filtradas = String periodoSelecionado = filtroPeriodo.getSelectedItem() != null
-                                        ? filtroPeriodo.getSelectedItem().toString()
-                                        : "Todos os meses";
+        String periodoSelecionado = filtroPeriodo.getSelectedItem() != null
+                ? filtroPeriodo.getSelectedItem().toString()
+                : "Todos os meses";
 
-                                String statusSelecionado = filtroStatus.getSelectedItem() != null
-                                        ? filtroStatus.getSelectedItem().toString()
-                                        : "Todos os status";
+        String statusSelecionado = filtroStatus.getSelectedItem() != null
+                ? filtroStatus.getSelectedItem().toString()
+                : "Todos os status";
 
-                                List<Conta> filtradas = FiltroHistorico.filtrar(
-                                        contas,
-                                        repositorio,
-                                        usuarioId,
-                                        periodoSelecionado,
-                                        statusSelecionado
-                                );
+        List<Conta> filtradas = FiltroHistorico.filtrar(
+                contas,
+                repositorio,
+                usuarioId,
+                periodoSelecionado,
+                statusSelecionado
+        );
         if (filtradas.isEmpty()) {
             adicionarVazio(contas.isEmpty() ? "Você ainda não participa de nenhuma conta."
                     : "Nenhuma conta encontrada para os filtros selecionados.");
         } else {
             for (Conta conta : filtradas) {
                 Despesa despesa = repositorio.getDespesa(conta.getId());
-                adicionarCardConta(conta, despesa.getStatus(usuarioId));
+
+                if (despesa != null) {
+                    StatusContribuicao status = despesa.getStatus(usuarioId);
+                    adicionarCardConta(conta, status);
+                }
             }
         }
         adicionarTitulo("Pagamentos");
@@ -173,7 +177,12 @@ public class HistoricoActivity extends AppCompatActivity {
                 16, "#222222", true
         ));
 
+        if (status == null) {
+            status = StatusContribuicao.PENDENTE;
+        }
+
         String descricao;
+
         switch (status) {
             case CONFIRMADO: descricao = "Contribuição confirmada"; break;
             case SINALIZADO: descricao = "Pagamento sinalizado"; break;
