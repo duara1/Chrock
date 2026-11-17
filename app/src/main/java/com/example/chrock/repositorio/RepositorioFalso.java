@@ -54,14 +54,13 @@ public class RepositorioFalso {
         casa.setMembrosPapel("u3", Papel.MODERADOR);
         salas.put(casa.getId(), casa);
 
-        Despesa agua = criarDespesa("d1", "s1", "u1", "Água", 10000, "09/11/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u1", "u2", "u3")));
-        Despesa luz = criarDespesa("d2", "s1", "u1", "Luz", 20000, "05/11/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u2")));
-        Despesa internet = criarDespesa("d3", "s1", "u2", "Internet", 12000, "17/11/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u1", "u3")));
+        Despesa agua = criarDespesa("d1", "s1", "u1", "Água", 10000, "18/11/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u1", "u2", "u3")));
+        Despesa luz = criarDespesa("d2", "s1", "u1", "Luz", 20000, "27/11/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u2")));
+        Despesa internet = criarDespesa("d3", "s1", "u2", "Internet", 12000, "16/11/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u2", "u3")));
         Despesa mercado = criarDespesa("d4", "s1", "u1", "Mercado", 150000, "20/10/2026", usuarios.get("u1").getPix(), new ArrayList<>(List.of("u1", "u2", "u3")));
-        Despesa netflix = criarDespesa("d5", "s1", "u3", "Netflix", 5000, "22/11/2026", usuarios.get("u3").getPix(), new ArrayList<>(List.of("u3")));
+        Despesa netflix = criarDespesa("d5", "s1", "u2", "Netflix", 5000, "28/11/2026", usuarios.get("u3").getPix(), new ArrayList<>(List.of("u3")));
 
-
-        internet.mudarStatus("u1", StatusContribuicao.SINALIZADO);
+        internet.mudarStatus("u3", StatusContribuicao.SINALIZADO);
         mercado.mudarStatus("u1", StatusContribuicao.CONFIRMADO);
         mercado.mudarStatus("u2", StatusContribuicao.CONFIRMADO);
         mercado.mudarStatus("u3", StatusContribuicao.CONFIRMADO);

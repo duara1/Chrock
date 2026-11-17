@@ -1,8 +1,10 @@
 package com.example.chrock.Adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,12 +30,14 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
         TextView para;
         TextView vencimento;
         TextView valor;
+        ImageView bola;
         public ViewHolder(View card){
             super(card);
             titulo = card.findViewById(R.id.nomeDespesa);
             para = card.findViewById(R.id.para);
             vencimento = card.findViewById(R.id.venceEm);
             valor = card.findViewById(R.id.valor);
+            bola = card.findViewById(R.id.bola);
         }
 
     }
@@ -50,8 +54,26 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
         Despesa item = itens.get(posicao);
 
         h.titulo.setText(item.getTitulo());
-        h.para.setText("Para:" + repo.getUsuario(item.getResponsavelId()).getNome());
-        h.vencimento.setText(item.getVencimento());
+        h.para.setText("Para: " + repo.getUsuario(item.getResponsavelId()).getNome());
+
+        int diasAte = Formatar.diasAte(item.getVencimento());
+        if (diasAte <= 10 && diasAte > 5) {
+            h.bola.setVisibility(View.VISIBLE);
+            h.bola.setImageResource(R.drawable.bola_amarela);
+        } else if (diasAte <= 5 && diasAte > 0){
+            h.bola.setVisibility(View.VISIBLE);
+            h.bola.setImageResource(R.drawable.bola_vermelha);
+        } else if (diasAte == 0){
+            h.vencimento.setText("Vence HOJE");
+            h.vencimento.setTextColor(Color.RED);
+        } else if (diasAte < 0) {
+            h.vencimento.setText("Despesa vencida");
+            h.vencimento.setTextColor(Color.RED);
+        }
+
+        if (diasAte == 1) h.vencimento.setText("Vence em " + diasAte + " dia");
+        if (diasAte > 1) h.vencimento.setText("Vence em " + diasAte + " dias");
+
         h.valor.setText(Formatar.reais(item.getValorTransferirAConfirmar()));
     }
 

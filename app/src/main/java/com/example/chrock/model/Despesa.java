@@ -96,6 +96,18 @@ public class  Despesa {
         }
     }
 
+    public int getRecebidoEmInt() {
+        int porPessoa = getValorTransferirAConfirmar();
+        int soma = 0;
+        for (Contribuicao c : contribuintes) {
+            if (!c.getUsuarioId().equals(responsavelId)
+                    && c.getStatus() == StatusContribuicao.CONFIRMADO) {
+                soma += porPessoa;
+            }
+        }
+        return soma;
+    }
+
     public String getChavePix() {
         return chavePix;
     }
