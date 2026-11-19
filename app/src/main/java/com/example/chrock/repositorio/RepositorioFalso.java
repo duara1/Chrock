@@ -1,6 +1,7 @@
 package com.example.chrock.repositorio;
 
 import com.example.chrock.model.Contribuicao;
+import com.example.chrock.model.Geral;
 import com.example.chrock.model.Papel;
 import com.example.chrock.model.Sala;
 import com.example.chrock.model.StatusContribuicao;
@@ -94,6 +95,58 @@ public class RepositorioFalso {
         }
         return resu;
     }
+
+    public static class cardsInfo{
+        public int pendente;
+        public int pago;
+        public int total;
+
+        public cardsInfo(int pendente, int pago, int total){
+            this.pendente = pendente;
+            this.pago = pago;
+            this.total = total;
+        }
+    }
+    public cardsInfo getInfosCard(String usuarioId, String salaId, Geral card){
+        int pendente = 0;
+        int pago = 0;
+        int total = 0;
+        if (card.equals(Geral.PESSOAL)) {
+            for (Despesa d : despesas) {
+                if (d.isContribuente(usuarioId) && d.getSalaId().equals(salaId)) {
+                    total = total + d.getValorTransferirAConfirmar();
+                }
+
+                if (d.isContribuente(usuarioId) && d.getSalaId().equals(salaId) && d.getStatus(usuarioId).equals(StatusContribuicao.CONFIRMADO)) {
+                    pago = pago + d.getValorTransferirAConfirmar();
+                }
+
+                if (d.isContribuente(usuarioId) && d.getSalaId().equals(salaId) && !d.getStatus(usuarioId).equals(StatusContribuicao.CONFIRMADO)) {
+                    pendente = pendente + d.getValorTransferirAConfirmar();
+                }
+            }
+            return new cardsInfo(pendente, pago, total);
+        }
+
+        if (card.equals(Geral.SALA)){
+            for (Despesa d: despesas) {
+                if (d.getSalaId().equals(salaId)){
+                    total = total + d.getTotalEmInt();
+                }
+
+                if (d.getSalaId().equals(salaId) && d.isConcluida()){
+                    pago = pago + d.getTotalEmInt();
+                }
+
+                if (d.getSalaId().equals(salaId) && !d.isConcluida()){
+                    pendente = pendente + d.getTotalEmInt();
+                }
+            }
+            return new cardsInfo(pendente, pago, total);
+        }
+        return new cardsInfo(pendente, pago, total);
+    }
+
 
     public Despesa criarDespesa(String despesaId, String salaId, String responsavelId, String titulo, int totalEmInt, String vencimento, String chavePix, List<String> contribuentes){
         Despesa d = new Despesa(despesaId, salaId, responsavelId, titulo, totalEmInt, vencimento, chavePix, contribuentes);

@@ -1,5 +1,7 @@
 package com.example.chrock.Adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.R;
+import com.example.chrock.despesa_informacoes;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.util.Animacao;
 import com.example.chrock.util.Formatar;
 
 import java.util.List;
@@ -38,6 +42,7 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
             vencimento = card.findViewById(R.id.venceEm);
             valor = card.findViewById(R.id.valor);
             bola = card.findViewById(R.id.bola);
+            Animacao.efeitoApertar(card);
         }
 
     }
@@ -75,6 +80,16 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
         if (diasAte > 1) h.vencimento.setText("Vence em " + diasAte + " dias");
 
         h.valor.setText(Formatar.reais(item.getValorTransferirAConfirmar()));
+
+        h.itemView.setOnClickListener(v ->{
+            Context contexto = v.getContext();
+
+            Intent intent = new Intent(contexto, despesa_informacoes.class);
+            intent.putExtra("id", item.getDespesaId());
+
+
+            contexto.startActivity(intent);
+        });
     }
 
     @Override

@@ -5,7 +5,6 @@
     android:layout_width="160dp"
     android:layout_height="wrap_content"
     android:background="@drawable/borda_card"
-    android:stateListAnimator="@animator/pressionar_card"
     android:clickable="true"
     android:focusable="true"
     android:padding="10dp"

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.R;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.util.Animacao;
 import com.example.chrock.util.Formatar;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
             contagem = card.findViewById(R.id.valor);
             progresso = card.findViewById(R.id.barraProgresso);
             bola = card.findViewById(R.id.bola);
+            Animacao.efeitoApertar(card);
         }
     }
 

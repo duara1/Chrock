@@ -1,9 +1,10 @@
 package com.example.chrock;
 
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.Adapter.ConfirmacaoAdapter;
 import com.example.chrock.Adapter.responsavelAdapter;
 import com.example.chrock.Adapter.transferenciaAdapter;
+import com.example.chrock.data.AuthApi;
+import com.example.chrock.data.Sessao;
 import com.example.chrock.model.Despesa;
+import com.example.chrock.model.Geral;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.util.Formatar;
 
 import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +42,18 @@ public class MainActivity extends AppCompatActivity {
         RepositorioFalso repo = RepositorioFalso.get();
         String usuarioId = "u2";
         String salaId = "s1";
+
+        //PESSOAL
+        RepositorioFalso.cardsInfo geralPes = repo.getInfosCard(usuarioId, salaId, Geral.PESSOAL);
+        ((TextView) findViewById(R.id.pendValorPessoal)).setText(Formatar.reais(geralPes.pendente));
+        ((TextView) findViewById(R.id.pagValorPessoal)).setText(Formatar.reais(geralPes.pago));
+        ((TextView) findViewById(R.id.totalValorPessoal)).setText(Formatar.reais(geralPes.total));
+
+        //SALA
+        RepositorioFalso.cardsInfo geralSala = repo.getInfosCard(usuarioId, salaId, Geral.SALA);
+        ((TextView) findViewById(R.id.pendValorSala)).setText(Formatar.reais(geralSala.pendente));
+        ((TextView) findViewById(R.id.pagValorSala)).setText(Formatar.reais(geralSala.pago));
+        ((TextView) findViewById(R.id.pagoValorSala)).setText(Formatar.reais(geralSala.total));
 
         //CONFIRMAR
         List<RepositorioFalso.ItemConfirmacao> aConfirmar = repo.aConfirmar(usuarioId, salaId);
@@ -66,5 +84,21 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.tituloResponsavel).setVisibility(visiResponsavel);
         findViewById(R.id.subTituloResponsavel).setVisibility(visiResponsavel);
         listaResponsavel.setVisibility(visiResponsavel);
+
+
+
+        AuthApi.cadastrar("Fulano Teste", "fulano@email.com", "teste2@exemplo.com", "senha12345",
+                new AuthApi.Retorno() {
+                    @Override
+                    public void sucesso() {
+                        Log.d("CHROK", "Logado! id = " + Sessao.getUsuarioId());
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+                        runOnUiThread(() ->
+                                Toast.makeText(MainActivity.this, mensagem, Toast.LENGTH_LONG).show());
+                    }
+                });
     }
 }
