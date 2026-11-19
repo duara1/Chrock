@@ -1,5 +1,7 @@
 package com.example.chrock.model;
 
+import android.net.Uri;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +12,7 @@ public class Sala {
     private String ADMId;
     private String titulo;
     private String descricao;
-    private String img;
+    private Uri img;
     private Map<String, Papel> membros = new HashMap<>();
 
     public Sala(String id, String codigo, String ADMId, String titulo, String descricao) {
@@ -22,6 +24,17 @@ public class Sala {
         membros.put(ADMId, Papel.ADM);
     }
 
+    public static Sala doServidor(String id, String titulo, String descricao, String codigo,
+                                  String img, String admId, Map<String, Papel> membros) {
+        Sala s = new Sala(id, codigo, admId, titulo, descricao);
+        s.setImg(Uri.parse(img));
+        for (Map.Entry<String, Papel> e : membros.entrySet()) {
+            if (e.getKey().equals(admId)) continue;
+            s.adicionarMembro(e.getKey());
+            s.setMembrosPapel(e.getKey(), e.getValue());
+        }
+        return s;
+    }
     public void setMembrosPapel(String usuarioId, Papel papel) {
         if (!membros.containsKey(usuarioId)) {
             throw new IllegalArgumentException("Essa pessoa não está na sala.");
@@ -76,7 +89,7 @@ public class Sala {
         return id;
     }
 
-    public String getImg() {
+    public Uri getImg() {
         return img;
     }
 
@@ -88,7 +101,7 @@ public class Sala {
         this.descricao = descricao;
     }
 
-    public void setImg(String img) {
+    public void setImg(Uri img) {
         this.img = img;
     }
 

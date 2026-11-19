@@ -1,7 +1,10 @@
 package com.example.chrock.repositorio;
 
+import android.net.Uri;
+
 import com.example.chrock.model.Contribuicao;
 import com.example.chrock.model.Geral;
+import com.example.chrock.model.ItemConfirmacao;
 import com.example.chrock.model.Papel;
 import com.example.chrock.model.Sala;
 import com.example.chrock.model.StatusContribuicao;
@@ -21,15 +24,6 @@ public class RepositorioFalso {
     private List<Despesa> despesas = new ArrayList<>();
     private static RepositorioFalso instancia;
 
-    public static class ItemConfirmacao {
-        public final Despesa despesa;
-        public final String usuarioId;
-
-        public ItemConfirmacao(Despesa despesa, String usuarioId) {
-            this.despesa = despesa;
-            this.usuarioId = usuarioId;
-        }
-    }
 
     public static RepositorioFalso get(){
         if (instancia == null){
@@ -65,7 +59,7 @@ public class RepositorioFalso {
         mercado.mudarStatus("u1", StatusContribuicao.CONFIRMADO);
         mercado.mudarStatus("u2", StatusContribuicao.CONFIRMADO);
         mercado.mudarStatus("u3", StatusContribuicao.CONFIRMADO);
-        mercado.setComprovante("comprovante-mercado.pdf");
+        mercado.setComprovante(Uri.parse("https://exemplo.com"));
 
     }
 
@@ -149,7 +143,7 @@ public class RepositorioFalso {
 
 
     public Despesa criarDespesa(String despesaId, String salaId, String responsavelId, String titulo, int totalEmInt, String vencimento, String chavePix, List<String> contribuentes){
-        Despesa d = new Despesa(despesaId, salaId, responsavelId, titulo, totalEmInt, vencimento, chavePix, contribuentes);
+        Despesa d = new Despesa(despesaId, salaId, responsavelId, titulo, totalEmInt, vencimento, contribuentes);
         despesas.add(d);
         return d;
     }

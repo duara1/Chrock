@@ -15,6 +15,7 @@ import com.example.chrock.model.Contribuicao;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Formatar;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class despesa_informacoes extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        RepositorioFalso repo = RepositorioFalso.get();
+        RepositorioSupabase repo = RepositorioSupabase.get();
         String despesaId = getIntent().getStringExtra("id");
 
         Despesa item = repo.getDespesa(despesaId);

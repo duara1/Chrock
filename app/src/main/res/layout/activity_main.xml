@@ -394,7 +394,8 @@
                 android:textColor="@color/black"
                 android:layout_marginTop="15dp"
                 android:layout_marginStart="20dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/subTituloTransferir"
@@ -403,7 +404,8 @@
                 android:text="Envie o Pix para quem vai pagar a conta"
                 android:textSize="12sp"
                 android:textColor="@color/black"
-                android:layout_marginStart="20dp"/>
+                android:layout_marginStart="20dp"
+                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/listaTransferir"
@@ -503,5 +505,16 @@
             android:drawableTint="@color/black"
             android:textSize="13sp"/>
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/carregando"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 

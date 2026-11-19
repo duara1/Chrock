@@ -1,11 +1,18 @@
 package com.example.chrock.Adapter;
 
+import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -14,19 +21,39 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.R;
+import com.example.chrock.despesa_informacoes;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.repositorio.RepositorioFalso;
 import com.example.chrock.util.Animacao;
 import com.example.chrock.util.Formatar;
+import com.example.chrock.util.Vencimento;
 
 import java.util.List;
 
 public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.ViewHolder> {
     private List<Despesa> itens;
-    private RepositorioFalso repo = RepositorioFalso.get();
+    private Uri img;
+    private Button btnAbertoPopUp;
+    private Despesa despesaAbertaPopUp;
 
-    public responsavelAdapter(List<Despesa> itens){
+    public interface clikAnexar{
+        void clikAnexar(Despesa item, Button btnAnexar, Button paga);
+    }
+    private clikAnexar ouvinte;
+
+    public responsavelAdapter(List<Despesa> itens, clikAnexar ouvinte){
         this.itens = itens;
+        this.ouvinte = ouvinte;
+    }
+
+    public void receberUri(Uri img){
+        if (img != null){
+            this.img = img;
+
+            if (btnAbertoPopUp != null){
+                btnAbertoPopUp.setEnabled(true);
+            }
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -38,6 +65,7 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
         TextView contagem;
         ProgressBar progresso;
         ImageView bola;
+        int corVencimento;
 
         public ViewHolder(View card){
             super(card);
@@ -49,6 +77,7 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
             contagem = card.findViewById(R.id.valor);
             progresso = card.findViewById(R.id.barraProgresso);
             bola = card.findViewById(R.id.bola);
+            corVencimento = vencimento.getCurrentTextColor();
             Animacao.efeitoApertar(card);
         }
     }
@@ -63,39 +92,32 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder h, int posicao) {
         Despesa item = itens.get(posicao);
+
         h.titulo.setText(item.getTitulo());
-
-        int diasAte = Formatar.diasAte(item.getVencimento());
-        if (diasAte <= 10 && diasAte > 5) {
-            h.bola.setVisibility(View.VISIBLE);
-            h.bola.setImageResource(R.drawable.bola_amarela);
-        } else if (diasAte <= 5 && diasAte > 0){
-            h.bola.setVisibility(View.VISIBLE);
-            h.bola.setImageResource(R.drawable.bola_vermelha);
-        } else if (diasAte == 0){
-            h.vencimento.setText("Vence HOJE");
-            h.vencimento.setTextColor(Color.RED);
-        } else if (diasAte < 0) {
-            h.vencimento.setText("Despesa vencida");
-            h.vencimento.setTextColor(Color.RED);
-        }
-
-        if (diasAte == 1) h.vencimento.setText("Vence em " + diasAte + " dia");
-        if (diasAte > 1) h.vencimento.setText("Vence em " + diasAte + " dias");
-
+        Vencimento.aplicar(h.vencimento, h.bola, h.corVencimento, item.getVencimento());
 
         h.total.setText("Total da conta: " + Formatar.reais(item.getTotalEmInt()));
+
+        h.suaParte.setVisibility(item.isResponsavelContribui() ? View.VISIBLE : View.GONE);
         h.suaParte.setText("Sua parte: " + Formatar.reais(item.getValorATransferirEmInt(item.getResponsavelId())));
 
         int meta = item.getMetaDeRecebimento();
-        if (meta > 0){
+        if (meta > 0) {
+            int recebido = item.getRecebidoEmInt();
+
+            h.recebido.setText("Recebido");
+            h.recebido.setGravity(Gravity.START);
+            h.recebido.setTypeface(null, Typeface.NORMAL);
             h.recebido.setVisibility(View.VISIBLE);
+
             h.contagem.setVisibility(View.VISIBLE);
-            h.contagem.setText(Formatar.reais(item.getRecebidoEmInt()) + " de " + Formatar.reais(item.getTotalEmInt()));
+            h.contagem.setText(Formatar.reais(recebido) + " de " + Formatar.reais(meta));
+
             h.progresso.setVisibility(View.VISIBLE);
-            h.progresso.setMax(item.getTotalEmInt());
-            h.progresso.setProgress(item.getRecebidoEmInt());
-        }else {
+            h.progresso.setMax(meta);
+            h.progresso.setProgress(recebido);
+            h.progresso.setContentDescription("Recebido " + Formatar.reais(recebido) + " de " + Formatar.reais(meta));
+        } else {
             h.recebido.setVisibility(View.VISIBLE);
             h.recebido.setText("Sem contribuições");
             h.recebido.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -103,6 +125,54 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
             h.contagem.setVisibility(View.GONE);
             h.progresso.setVisibility(View.GONE);
         }
+
+        h.itemView.setOnClickListener(v ->{
+            Context contexto = v.getContext();
+            Dialog popUp = new Dialog(contexto);
+            popUp.setContentView(R.layout.item_pop_up);
+
+            if (popUp.getWindow() != null) {
+                popUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
+
+            TextView titulo = popUp.findViewById(R.id.titulo);
+            TextView valor = popUp.findViewById(R.id.valor);
+            Button anexar = popUp.findViewById(R.id.button);
+            Button verMais = popUp.findViewById(R.id.verMais);
+            Button contaPaga = popUp.findViewById(R.id.paga);
+            ImageButton sair = popUp.findViewById(R.id.sair);
+
+            titulo.setText(item.getTitulo());
+            valor.setText("Valor: " + Formatar.reais(item.getTotalEmInt()));
+
+            anexar.setOnClickListener(view ->{
+                if (ouvinte != null){
+                    this.btnAbertoPopUp = contaPaga;
+                    this.despesaAbertaPopUp = item;
+                    ouvinte.clikAnexar(item, anexar, contaPaga);
+                }
+            });
+
+            contaPaga.setOnClickListener(View -> {
+                if (img != null){
+                    item.setComprovante(img);
+                }
+                notifyDataSetChanged();
+                popUp.dismiss();
+            });
+
+            sair.setOnClickListener(vS ->{
+                popUp.dismiss();
+            });
+
+            verMais.setOnClickListener(view ->{
+                Intent intent = new Intent(contexto, despesa_informacoes.class);
+                intent.putExtra("id", item.getDespesaId());
+                contexto.startActivity(intent);
+            });
+
+            popUp.show();
+        });
     }
 
     @Override

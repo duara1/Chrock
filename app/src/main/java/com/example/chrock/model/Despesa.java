@@ -1,5 +1,7 @@
 package com.example.chrock.model;
 
+import android.net.Uri;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -10,18 +12,16 @@ public class  Despesa {
     private String titulo;
     private int totalEmInt;
     private String vencimento;
-    private String chavePix;
     private List<Contribuicao> contribuintes;
-    private String comprovante;
+    private Uri comprovante;
 
-    public Despesa(String despesaId, String salaId, String responsavelId, String titulo, int totalEmInt, String vencimento, String chavePix, List<String> contribuentes) {
+    public Despesa(String despesaId, String salaId, String responsavelId, String titulo, int totalEmInt, String vencimento , List<String> contribuentes) {
         this.despesaId = despesaId;
         this.salaId = salaId;
         this.responsavelId = responsavelId;
         this.titulo = titulo;
         this.totalEmInt = totalEmInt;
         this.vencimento = vencimento;
-        this.chavePix = chavePix;
 
         if (contribuentes == null || contribuentes.isEmpty()){
             throw new IllegalArgumentException("Escolha pelo menos 1 contribuente");
@@ -30,6 +30,31 @@ public class  Despesa {
         for (String id:contribuentes) {
             this.contribuintes.add(new Contribuicao(id));
         }
+    }
+
+    private Despesa(String despesaId, String salaId, String responsavelId, String titulo,
+                    int totalEmInt, String vencimento, String comprovante,
+                    List<Contribuicao> contribuintes) {
+        this.despesaId = despesaId;
+        this.salaId = salaId;
+        this.responsavelId = responsavelId;
+        this.titulo = titulo;
+        this.totalEmInt = totalEmInt;
+        this.vencimento = vencimento;
+        this.comprovante = (comprovante == null || comprovante.trim().isEmpty())
+                ? null
+                : Uri.parse(comprovante.trim());
+        this.contribuintes = new ArrayList<>(contribuintes);
+    }
+
+    public static Despesa doServidor(String despesaId, String salaId, String responsavelId,
+                                     String titulo, int totalEmInt, String vencimento,
+                                     String comprovante, List<Contribuicao> contribuintes) {
+        if (contribuintes == null || contribuintes.isEmpty()) {
+            throw new IllegalArgumentException("Despesa sem contribuintes");
+        }
+        return new Despesa(despesaId, salaId, responsavelId, titulo, totalEmInt,
+                vencimento, comprovante, contribuintes);
     }
 
     public int getValorATransferirEmInt(String usuarioId){
@@ -89,7 +114,7 @@ public class  Despesa {
     }
 
     public boolean isConcluida(){
-        if (comprovante != null && !comprovante.trim().isEmpty()){
+        if (comprovante != null && !comprovante.toString().trim().isEmpty()){
             return true;
         } else {
             return false;
@@ -108,11 +133,7 @@ public class  Despesa {
         return soma;
     }
 
-    public String getChavePix() {
-        return chavePix;
-    }
-
-    public String getComprovante() {
+    public Uri getComprovante() {
         return comprovante;
     }
 
@@ -144,7 +165,7 @@ public class  Despesa {
         return vencimento;
     }
 
-    public void setComprovante(String comprovante) {
+    public void setComprovante(Uri comprovante) {
         this.comprovante = comprovante;
     }
 }

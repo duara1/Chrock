@@ -9,16 +9,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.R;
+import com.example.chrock.model.ItemConfirmacao;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Formatar;
 
 import java.util.List;
+import java.util.Map;
 
 public class ConfirmacaoAdapter extends RecyclerView.Adapter<ConfirmacaoAdapter.ViewHolder> {
-    private List<RepositorioFalso.ItemConfirmacao> itens;
-    private RepositorioFalso repo = RepositorioFalso.get();
-    public ConfirmacaoAdapter(List<RepositorioFalso.ItemConfirmacao> itens){
+    private final List<ItemConfirmacao> itens;
+    private final RepositorioSupabase repo = RepositorioSupabase.get();
+
+    public ConfirmacaoAdapter(List<ItemConfirmacao> itens) {
         this.itens = itens;
     }
 
@@ -44,9 +48,10 @@ public class ConfirmacaoAdapter extends RecyclerView.Adapter<ConfirmacaoAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder h, int posicao){
-        RepositorioFalso.ItemConfirmacao item = itens.get(posicao);
+        ItemConfirmacao item = itens.get(posicao);
 
-        h.nome.setText(repo.getUsuario(item.usuarioId).getNome());
+        Usuario u = repo.getUsuario(item.usuarioId);
+        h.nome.setText(u != null ? u.getNome() : "Alguém");
         h.valor.setText("Transferiu: " + Formatar.reais(item.despesa.getValorTransferirAConfirmar()));
         h.despesa.setText("De: " + item.despesa.getTitulo());
     }

@@ -1,12 +1,18 @@
 package com.example.chrock;
 
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -20,13 +26,126 @@ import com.example.chrock.data.AuthApi;
 import com.example.chrock.data.Sessao;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.Geral;
+import com.example.chrock.model.ItemConfirmacao;
+import com.example.chrock.model.Sala;
+import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Formatar;
+import com.example.chrock.util.Secoes;
 
 import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
+    private responsavelAdapter adapter;
+    private ProgressBar carregando;
+    private Despesa item;
+    private Button btnAnexar;
+    private  Button paga;
+    private ActivityResultLauncher<String> pegarImg = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            caminho ->{
+                    if (caminho != null){
+                        if (btnAnexar != null){
+                            btnAnexar.setText("Imagem anexada");
+                            paga.setTextColor(Color.rgb(99,77,244));
+                            adapter.receberUri(caminho);
+                        }
+                    }
+            }
+    );
+
+    private void carregarHome() {
+        RepositorioSupabase repo = RepositorioSupabase.get();
+
+        repo.carregarSalas(new RepositorioSupabase.Resposta<List<Sala>>() {
+            @Override
+            public void sucesso(List<Sala> salas) {
+                if (salas.isEmpty()) {
+                    carregando.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, "Você ainda não está em nenhuma sala.",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                carregarDadosDaSala(salas.get(0));
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhaNaHome(mensagem);
+            }
+        });
+    }
+
+    private void carregarDadosDaSala(Sala sala) {
+        RepositorioSupabase repo = RepositorioSupabase.get();
+
+        repo.carregarDespesas(sala.getId(), new RepositorioSupabase.Resposta<List<Despesa>>() {
+            @Override
+            public void sucesso(List<Despesa> despesas) {
+                repo.carregarMembros(sala.getId(),
+                        new RepositorioSupabase.Resposta<Map<String, Usuario>>() {
+                            @Override
+                            public void sucesso(Map<String, Usuario> usuarios) {
+                                montarHome(despesas);
+                            }
+
+                            @Override
+                            public void erro(String mensagem) {
+                                falhaNaHome(mensagem);
+                            }
+                        });
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhaNaHome(mensagem);
+            }
+        });
+    }
+
+    private void montarHome(List<Despesa> despesas) {
+        String eu = Sessao.getUsuarioId();
+
+        List<ItemConfirmacao> aConfirmar = Secoes.aConfirmar(despesas, eu);
+        List<Despesa> aTransferir = Secoes.aTransferir(despesas, eu);
+        List<Despesa> responsavel = Secoes.souResponsavel(despesas, eu);
+
+        ((RecyclerView) findViewById(R.id.listaConfirmar))
+                .setAdapter(new ConfirmacaoAdapter(aConfirmar));
+        ((RecyclerView) findViewById(R.id.listaTransferir))
+                .setAdapter(new transferenciaAdapter(aTransferir));
+        ((RecyclerView) findViewById(R.id.listaResponsavel))
+                .setAdapter(new responsavelAdapter(responsavel, (item, btnAnexar, paga) ->{
+                    this.item = item;
+                    this.btnAnexar = btnAnexar;
+                    this.paga = paga;
+                    pegarImg.launch("image/*");
+                }));
+
+        mostrar(!aConfirmar.isEmpty(),
+                R.id.tituloConfirmar, R.id.subTituloConfirmar, R.id.listaConfirmar);
+        mostrar(!aTransferir.isEmpty(),
+                R.id.tituloTransferir, R.id.subTituloTransferir, R.id.listaTransferir);
+        mostrar(!responsavel.isEmpty(),
+                R.id.tituloResponsavel, R.id.subTituloResponsavel, R.id.listaResponsavel);
+
+        carregando.setVisibility(View.GONE);
+    }
+
+    private void mostrar(boolean visivel, int... ids) {
+        for (int id : ids) {
+            findViewById(id).setVisibility(visivel ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void falhaNaHome(String mensagem) {
+        carregando.setVisibility(View.GONE);
+        Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,67 +157,23 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        carregando = findViewById(R.id.carregando);
 
-        RepositorioFalso repo = RepositorioFalso.get();
-        String usuarioId = "u2";
-        String salaId = "s1";
+        carregando.setVisibility(View.VISIBLE);
 
-        //PESSOAL
-        RepositorioFalso.cardsInfo geralPes = repo.getInfosCard(usuarioId, salaId, Geral.PESSOAL);
-        ((TextView) findViewById(R.id.pendValorPessoal)).setText(Formatar.reais(geralPes.pendente));
-        ((TextView) findViewById(R.id.pagValorPessoal)).setText(Formatar.reais(geralPes.pago));
-        ((TextView) findViewById(R.id.totalValorPessoal)).setText(Formatar.reais(geralPes.total));
+        AuthApi.entrar("teste2@exemplo.com", "senha12345", new AuthApi.Retorno() {
+            @Override
+            public void sucesso() {
+                runOnUiThread(() -> carregarHome());
+            }
 
-        //SALA
-        RepositorioFalso.cardsInfo geralSala = repo.getInfosCard(usuarioId, salaId, Geral.SALA);
-        ((TextView) findViewById(R.id.pendValorSala)).setText(Formatar.reais(geralSala.pendente));
-        ((TextView) findViewById(R.id.pagValorSala)).setText(Formatar.reais(geralSala.pago));
-        ((TextView) findViewById(R.id.pagoValorSala)).setText(Formatar.reais(geralSala.total));
-
-        //CONFIRMAR
-        List<RepositorioFalso.ItemConfirmacao> aConfirmar = repo.aConfirmar(usuarioId, salaId);
-        RecyclerView listaConfirmacao = findViewById(R.id.listaConfirmar);
-        listaConfirmacao.setAdapter(new ConfirmacaoAdapter(aConfirmar));
-
-        int visiConfirmar = aConfirmar.isEmpty() ? View.GONE : View.VISIBLE;
-        findViewById(R.id.tituloConfirmar).setVisibility(visiConfirmar);
-        findViewById(R.id.subTituloConfirmar).setVisibility(visiConfirmar);
-        listaConfirmacao.setVisibility(visiConfirmar);
-
-        //TRANSFERIR
-        List<Despesa> aTransferir = repo.aTransferir(usuarioId, salaId);
-        RecyclerView listaTranferencia = findViewById(R.id.listaTransferir);
-        listaTranferencia.setAdapter(new transferenciaAdapter(aTransferir));
-
-        int visiTransferencia = aTransferir.isEmpty() ? View.GONE : View.VISIBLE;
-        findViewById(R.id.tituloTransferir).setVisibility(visiTransferencia);
-        findViewById(R.id.subTituloTransferir).setVisibility(visiTransferencia);
-        listaTranferencia.setVisibility(visiTransferencia);
-
-        //RESPONSAVEL
-        List<Despesa> responsavel = repo.souResponsavel(usuarioId, salaId);
-        RecyclerView listaResponsavel = findViewById(R.id.listaResponsavel);
-        listaResponsavel.setAdapter(new responsavelAdapter(responsavel));
-
-        int visiResponsavel = responsavel.isEmpty() ? View.GONE : View.VISIBLE;
-        findViewById(R.id.tituloResponsavel).setVisibility(visiResponsavel);
-        findViewById(R.id.subTituloResponsavel).setVisibility(visiResponsavel);
-        listaResponsavel.setVisibility(visiResponsavel);
-
-
-
-        AuthApi.cadastrar("Fulano Teste", "fulano@email.com", "teste2@exemplo.com", "senha12345",
-                new AuthApi.Retorno() {
-                    @Override
-                    public void sucesso() {
-                        Log.d("CHROK", "Logado! id = " + Sessao.getUsuarioId());
-                    }
-
-                    @Override
-                    public void erro(String mensagem) {
-                        runOnUiThread(() ->
-                                Toast.makeText(MainActivity.this, mensagem, Toast.LENGTH_LONG).show());
-                    }
+            @Override
+            public void erro(String mensagem) {
+                runOnUiThread(() -> {
+                    carregando.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, mensagem, Toast.LENGTH_LONG).show();
                 });
+            }
+        });
     }
 }

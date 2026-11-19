@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.R;
 import com.example.chrock.model.Contribuicao;
 import com.example.chrock.model.StatusContribuicao;
+import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioFalso;
 
 import java.util.List;
@@ -28,12 +29,14 @@ public class contribuintesAdapter extends RecyclerView.Adapter<contribuintesAdap
         TextView nome;
         TextView status;
         TextView dataPagamento;
+        int corStatus;
 
         public ViewHolder(View card){
             super(card);
             nome = card.findViewById(R.id.nomeContribuente);
             status = card.findViewById(R.id.status);
             dataPagamento = card.findViewById(R.id.data);
+            corStatus = status.getCurrentTextColor();
         }
     }
 
@@ -48,25 +51,26 @@ public class contribuintesAdapter extends RecyclerView.Adapter<contribuintesAdap
     public void onBindViewHolder(@NonNull ViewHolder h, int posicao) {
         Contribuicao item = itens.get(posicao);
 
-        h.nome.setText(repo.getUsuario(item.getUsuarioId()).getNome());
+        Usuario u = repo.getUsuario(item.getUsuarioId());
+        h.nome.setText(u != null ? u.getNome() : "Alguém");
 
-        StatusContribuicao status = item.getStatus();
-        if (status == StatusContribuicao.CONFIRMADO){
-            h.status.setVisibility(View.VISIBLE);
-            h.status.setText("Concluído");
-            h.status.setTextColor(Color.GREEN);
-            h.dataPagamento.setVisibility(View.VISIBLE);
-            h.dataPagamento.setText("Em: " + item.getDataPagmento());
-        } else if (status == StatusContribuicao.CONTESTADO){
-            h.status.setVisibility(View.VISIBLE);
-            h.status.setText("Contestado");
-            h.status.setTextColor(Color.RED);
-        } else if (status == StatusContribuicao.SINALIZADO){
-            h.status.setVisibility(View.VISIBLE);
-            h.status.setText("Aguardando confirmação");
-        } else {
-            h.status.setVisibility(View.VISIBLE);
-            h.status.setText("Pendente");
+        h.status.setVisibility(View.VISIBLE);
+        h.status.setTextColor(h.corStatus);
+        switch (item.getStatus()) {
+            case CONFIRMADO:
+                h.status.setText("Concluído");
+                h.status.setTextColor(Color.GREEN);
+                break;
+            case CONTESTADO:
+                h.status.setText("Contestado");
+                h.status.setTextColor(Color.RED);
+                break;
+            case SINALIZADO:
+                h.status.setText("Aguardando confirmação");
+                break;
+            default:
+                h.status.setText("Pendente");
+                break;
         }
     }
 

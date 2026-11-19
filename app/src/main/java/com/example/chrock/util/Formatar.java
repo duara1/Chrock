@@ -19,4 +19,12 @@ public class Formatar {
         LocalDate fim = LocalDate.parse(data, formato);
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), fim);
     }
+
+    public static String deIso(String iso) {
+        return LocalDate.parse(iso).format(formato);
+    }
+
+    public static String paraIso(String vencimento) {
+        return LocalDate.parse(vencimento, formato).format(DateTimeFormatter.ISO_LOCAL_DATE);
+    }
 }

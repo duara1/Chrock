@@ -15,15 +15,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.R;
 import com.example.chrock.despesa_informacoes;
 import com.example.chrock.model.Despesa;
+import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Animacao;
 import com.example.chrock.util.Formatar;
+import com.example.chrock.util.Vencimento;
 
 import java.util.List;
 
 public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdapter.ViewHolder> {
     private List<Despesa> itens;
-    RepositorioFalso repo = RepositorioFalso.get();
+    private final RepositorioSupabase repo = RepositorioSupabase.get();
 
     public transferenciaAdapter(List<Despesa> itens){
         this.itens = itens;
@@ -35,6 +38,7 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
         TextView vencimento;
         TextView valor;
         ImageView bola;
+        int corVencimento;
         public ViewHolder(View card){
             super(card);
             titulo = card.findViewById(R.id.nomeDespesa);
@@ -42,6 +46,7 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
             vencimento = card.findViewById(R.id.venceEm);
             valor = card.findViewById(R.id.valor);
             bola = card.findViewById(R.id.bola);
+            corVencimento = vencimento.getCurrentTextColor();
             Animacao.efeitoApertar(card);
         }
 
@@ -59,26 +64,11 @@ public class transferenciaAdapter extends RecyclerView.Adapter<transferenciaAdap
         Despesa item = itens.get(posicao);
 
         h.titulo.setText(item.getTitulo());
-        h.para.setText("Para: " + repo.getUsuario(item.getResponsavelId()).getNome());
 
-        int diasAte = Formatar.diasAte(item.getVencimento());
-        if (diasAte <= 10 && diasAte > 5) {
-            h.bola.setVisibility(View.VISIBLE);
-            h.bola.setImageResource(R.drawable.bola_amarela);
-        } else if (diasAte <= 5 && diasAte > 0){
-            h.bola.setVisibility(View.VISIBLE);
-            h.bola.setImageResource(R.drawable.bola_vermelha);
-        } else if (diasAte == 0){
-            h.vencimento.setText("Vence HOJE");
-            h.vencimento.setTextColor(Color.RED);
-        } else if (diasAte < 0) {
-            h.vencimento.setText("Despesa vencida");
-            h.vencimento.setTextColor(Color.RED);
-        }
+        Usuario resp = repo.getUsuario(item.getResponsavelId());
+        h.para.setText("Para: " + (resp != null ? resp.getNome() : "responsável"));
 
-        if (diasAte == 1) h.vencimento.setText("Vence em " + diasAte + " dia");
-        if (diasAte > 1) h.vencimento.setText("Vence em " + diasAte + " dias");
-
+        Vencimento.aplicar(h.vencimento, h.bola, h.corVencimento, item.getVencimento());
         h.valor.setText(Formatar.reais(item.getValorTransferirAConfirmar()));
 
         h.itemView.setOnClickListener(v ->{
