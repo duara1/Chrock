@@ -22,6 +22,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".InicioActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".Cadastrar"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
