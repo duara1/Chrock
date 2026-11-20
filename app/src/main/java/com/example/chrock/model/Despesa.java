@@ -60,7 +60,7 @@ public class  Despesa {
     public int getValorATransferirEmInt(String usuarioId){
         int pessoas = contribuintes.size();
         if (pessoas < 1) throw new IllegalArgumentException("ERRO: Ningem em contribuentes. - getValorATransferirEmInt");
-        if (usuarioId.equals(responsavelId) && !isContribuente(usuarioId)) return 0;
+        if (!isContribuente(usuarioId)) return 0;
         return (totalEmInt + pessoas - 1) / pessoas;
     }
 

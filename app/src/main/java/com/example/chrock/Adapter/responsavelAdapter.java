@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.R;
 import com.example.chrock.despesa_informacoes;
 import com.example.chrock.model.Despesa;
-import com.example.chrock.repositorio.RepositorioFalso;
 import com.example.chrock.util.Animacao;
 import com.example.chrock.util.Formatar;
 import com.example.chrock.util.Vencimento;

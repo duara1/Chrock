@@ -2,7 +2,6 @@ package com.example.chrock.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import com.example.chrock.R;
 import com.example.chrock.despesa_informacoes;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.Usuario;
-import com.example.chrock.repositorio.RepositorioFalso;
 import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Animacao;
 import com.example.chrock.util.Formatar;

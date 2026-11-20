@@ -11,15 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.R;
 import com.example.chrock.model.Contribuicao;
-import com.example.chrock.model.StatusContribuicao;
 import com.example.chrock.model.Usuario;
-import com.example.chrock.repositorio.RepositorioFalso;
+import com.example.chrock.repositorio.RepositorioSupabase;
 
 import java.util.List;
 
 public class contribuintesAdapter extends RecyclerView.Adapter<contribuintesAdapter.ViewHolder> {
     List<Contribuicao> itens;
-    RepositorioFalso repo = RepositorioFalso.get();
+    private final RepositorioSupabase repo = RepositorioSupabase.get();
 
     public contribuintesAdapter(List<Contribuicao> cont){
         itens = cont;

@@ -125,6 +125,114 @@ public class RepositorioSupabase {
                 });
     }
 
+    public void carregarDespesa(String despesaId, Resposta<Despesa> resposta) {
+        Api.get("/rest/v1/despesas?select=id,sala_id,responsavel_id,titulo,total_centavos,"
+                        + "vencimento,comprovante,contribuicoes(usuario_id,status)"
+                        + "&id=eq." + despesaId,
+                new Api.Resultado() {
+                    @Override
+                    public void sucesso(String corpo) {
+                        try {
+                            JSONArray lista = new JSONArray(corpo);
+                            if (lista.length() == 0) {
+                                falhar(resposta, "Despesa não encontrada.");
+                                return;
+                            }
+                            Despesa d = Conversor.despesa(lista.getJSONObject(0));
+                            TELA.post(() -> {
+                                despesasEmCache.put(d.getDespesaId(), d);
+                                resposta.sucesso(d);
+                            });
+                        } catch (JSONException | RuntimeException e) {
+                            falhar(resposta, "Resposta inesperada do servidor.");
+                        }
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+                        falhar(resposta, mensagem);
+                    }
+                });
+    }
+
+    public void carregarSala(String salaId, Resposta<Sala> resposta) {
+        Api.get("/rest/v1/salas?select=id,titulo,descricao,codigo,img,adm_id,"
+                        + "sala_membros(usuario_id,papel)&id=eq." + salaId,
+                new Api.Resultado() {
+                    @Override
+                    public void sucesso(String corpo) {
+                        try {
+                            JSONArray lista = new JSONArray(corpo);
+                            if (lista.length() == 0) {
+                                falhar(resposta, "Sala não encontrada.");
+                                return;
+                            }
+                            entregar(resposta, Conversor.sala(lista.getJSONObject(0)));
+                        } catch (JSONException | RuntimeException e) {
+                            falhar(resposta, "Resposta inesperada do servidor.");
+                        }
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+                        falhar(resposta, mensagem);
+                    }
+                });
+    }
+
+    public void criarSala(String titulo, String descricao, String img, Resposta<String> resposta) {
+        JSONObject args = new JSONObject();
+        try {
+            args.put("p_titulo", titulo);
+            args.put("p_descricao", descricao);
+            args.put("p_img", img == null ? JSONObject.NULL : img);
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc("criar_sala", args, new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, corpo.replace("\"", "").trim());
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
+    public void salvarSala(String salaId, String titulo, String descricao,
+                           List<String> moderadores, Resposta<Void> resposta) {
+        JSONObject args = new JSONObject();
+        try {
+            JSONArray ids = new JSONArray();
+            for (String id : moderadores) ids.put(id);
+
+            args.put("p_sala", salaId);
+            args.put("p_titulo", titulo);
+            args.put("p_descricao", descricao);
+            args.put("p_moderadores", ids);
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc("salvar_sala", args, new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, null);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
     private static <T> void entregar(Resposta<T> resposta, T dado) {
         TELA.post(() -> resposta.sucesso(dado));
     }

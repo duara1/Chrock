@@ -11,12 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.R;
 import com.example.chrock.model.ItemConfirmacao;
 import com.example.chrock.model.Usuario;
-import com.example.chrock.repositorio.RepositorioFalso;
 import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Formatar;
 
 import java.util.List;
-import java.util.Map;
 
 public class ConfirmacaoAdapter extends RecyclerView.Adapter<ConfirmacaoAdapter.ViewHolder> {
     private final List<ItemConfirmacao> itens;
