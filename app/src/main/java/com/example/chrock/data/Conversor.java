@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class Conversor {
@@ -28,7 +29,9 @@ public class Conversor {
         JSONArray lista = j.getJSONArray("sala_membros");
         for (int i = 0; i < lista.length(); i++) {
             JSONObject m = lista.getJSONObject(i);
-            membros.put(m.getString("usuario_id"), Papel.valueOf(m.getString("papel")));
+            // toUpperCase: aceita "moderador" ou "MODERADOR" vindo do banco
+            membros.put(m.getString("usuario_id"),
+                    Papel.valueOf(m.getString("papel").trim().toUpperCase(Locale.ROOT)));
         }
         return Sala.doServidor(j.getString("id"), texto(j, "titulo"), texto(j, "descricao"),
                 texto(j, "codigo"), texto(j, "img"), j.getString("adm_id"), membros);
@@ -39,10 +42,9 @@ public class Conversor {
         JSONArray lista = j.getJSONArray("contribuicoes");
         for (int i = 0; i < lista.length(); i++) {
             JSONObject c = lista.getJSONObject(i);
-            String data = c.isNull("data") ? null : Formatar.deIso(c.getString("data"));
             contribuicoes.add(new Contribuicao(
                     c.getString("usuario_id"),
-                    StatusContribuicao.valueOf(c.getString("status"))));
+                    StatusContribuicao.valueOf(c.getString("status").trim().toUpperCase(Locale.ROOT))));
         }
         String comprovante = j.isNull("comprovante") ? null : j.getString("comprovante");
         return Despesa.doServidor(j.getString("id"), j.getString("sala_id"),

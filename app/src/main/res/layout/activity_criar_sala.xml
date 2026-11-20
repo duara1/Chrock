@@ -116,6 +116,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textStyle="bold"
+                    android:textColor="@color/black"
                     android:layout_marginTop="30dp"
                     android:text="Escolha seus moderadores:"
                     android:visibility="gone"

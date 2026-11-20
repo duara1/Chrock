@@ -23,35 +23,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
+        android:contentDescription="Chrock"
         app:layout_constraintBottom_toBottomOf="@+id/view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/view"
         app:srcCompat="@drawable/logo" />
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        app:cardCornerRadius="30dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/imageButton3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:layout_editor_absoluteX="107dp"
-            tools:layout_editor_absoluteY="299dp"
-            tools:srcCompat="@tools:sample/avatars" />
-    </androidx.cardview.widget.CardView>
 
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Entrar com código"
+        android:backgroundTint="@color/roxoBtn"
         android:background="@drawable/btn_tela_inicial"
         android:layout_marginTop="15dp"
         android:textSize="15sp"
@@ -67,22 +50,51 @@
         android:background="@drawable/btn_tela_inicial"
         android:layout_marginTop="15dp"
         android:textSize="15sp"
+        android:backgroundTint="@color/roxoBtn"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button3" />
 
+    <!-- Altura 0dp + Top e Bottom: a lista ocupa o resto da tela e rola sozinha -->
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/listaSalas"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:paddingBottom="30dp"
         android:paddingTop="30dp"
         android:paddingStart="40dp"
         android:layout_marginEnd="40dp"
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button4"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/salas"
-        app:layout_constraintTop_toBottomOf="@+id/button4" />
+        tools:itemCount="3" />
+    <TextView
+        android:id="@+id/vazio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:gravity="center"
+        android:text="Você ainda não está em nenhuma sala. Entre com um código ou crie a sua."
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/listaSalas"
+        app:layout_constraintBottom_toBottomOf="@+id/listaSalas" />
 
+    <ProgressBar
+        android:id="@+id/carregando"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/listaSalas"
+        app:layout_constraintBottom_toBottomOf="@+id/listaSalas" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

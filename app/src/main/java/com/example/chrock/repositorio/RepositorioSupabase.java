@@ -27,10 +27,10 @@ public class RepositorioSupabase {
     }
 
     private static final Handler TELA = new Handler(Looper.getMainLooper());
-    private static RepositorioSupabase instancia;private final Map<String, Usuario> usuariosEmCache = new HashMap<>();
+    private static RepositorioSupabase instancia;
+
+    private final Map<String, Usuario> usuariosEmCache = new HashMap<>();
     private final Map<String, Despesa> despesasEmCache = new HashMap<>();
-
-
 
     public static RepositorioSupabase get() {
         if (instancia == null) {
@@ -105,8 +105,11 @@ public class RepositorioSupabase {
                             JSONArray lista = new JSONArray(corpo);
                             Map<String, Usuario> usuarios = new LinkedHashMap<>();
                             for (int i = 0; i < lista.length(); i++) {
-                                JSONObject perfil = lista.getJSONObject(i).getJSONObject("profiles");
-                                Usuario u = Conversor.usuario(perfil);
+                                JSONObject linha = lista.getJSONObject(i);
+                                // Se o banco esconder o perfil (regra RLS), pula essa pessoa
+                                // em vez de derrubar a tela inteira. O nome vira "Alguém".
+                                if (linha.isNull("profiles")) continue;
+                                Usuario u = Conversor.usuario(linha.getJSONObject("profiles"));
                                 usuarios.put(u.getId(), u);
                             }
                             TELA.post(() -> {
@@ -224,6 +227,30 @@ public class RepositorioSupabase {
             @Override
             public void sucesso(String corpo) {
                 entregar(resposta, null);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
+    // Entra na sala que tem esse código. Devolve o id da sala.
+    // Quem confere o código e coloca a pessoa na sala é a função entrar_na_sala do banco.
+    public void entrarComCodigo(String codigo, Resposta<String> resposta) {
+        JSONObject args = new JSONObject();
+        try {
+            args.put("p_codigo", codigo);
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc("entrar_na_sala", args, new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, corpo.replace("\"", "").trim());
             }
 
             @Override

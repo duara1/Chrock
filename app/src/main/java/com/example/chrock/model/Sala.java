@@ -39,7 +39,7 @@ public class Sala {
         if (!membros.containsKey(usuarioId)) {
             throw new IllegalArgumentException("Essa pessoa não está na sala.");
         }
-        if (usuarioId == ADMId) {
+        if (usuarioId.equals(ADMId)) {
             throw new IllegalArgumentException("O ADM não pode ter o papel alterado.");
         }
         membros.put(usuarioId, papel);

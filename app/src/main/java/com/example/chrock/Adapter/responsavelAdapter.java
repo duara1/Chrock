@@ -126,6 +126,11 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
         }
 
         h.itemView.setOnClickListener(v ->{
+            // Cada pop-up começa do zero, pra a imagem de uma despesa não ir pra outra
+            img = null;
+            btnAbertoPopUp = null;
+            despesaAbertaPopUp = null;
+
             Context contexto = v.getContext();
             Dialog popUp = new Dialog(contexto);
             popUp.setContentView(R.layout.item_pop_up);
@@ -152,8 +157,10 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
                 }
             });
 
-            contaPaga.setOnClickListener(View -> {
-                if (img != null){
+            contaPaga.setOnClickListener(vP -> {
+                // Só usa a imagem se ela foi anexada NESTA despesa
+                if (img != null && despesaAbertaPopUp == item){
+                    // Provisório: muda só no celular. Falta salvar no Supabase (Storage).
                     item.setComprovante(img);
                 }
                 notifyDataSetChanged();

@@ -27,14 +27,12 @@ public class contribuintesAdapter extends RecyclerView.Adapter<contribuintesAdap
     static class ViewHolder extends RecyclerView.ViewHolder{
         TextView nome;
         TextView status;
-        TextView dataPagamento;
         int corStatus;
 
         public ViewHolder(View card){
             super(card);
             nome = card.findViewById(R.id.nomeContribuente);
             status = card.findViewById(R.id.status);
-            dataPagamento = card.findViewById(R.id.data);
             corStatus = status.getCurrentTextColor();
         }
     }

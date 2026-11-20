@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.Adapter.ConfirmacaoAdapter;
 import com.example.chrock.Adapter.responsavelAdapter;
 import com.example.chrock.Adapter.transferenciaAdapter;
-import com.example.chrock.data.AuthApi;
 import com.example.chrock.data.Sessao;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.ItemConfirmacao;
@@ -34,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SalaInicio extends AppCompatActivity {
+    // A sala que a MainActivity mandou abrir
+    private String salaId;
     private responsavelAdapter adapter;
     private ProgressBar carregando;
     private Sala salaAtual;
@@ -44,7 +45,7 @@ public class SalaInicio extends AppCompatActivity {
             new ActivityResultContracts.GetContent(),
             caminho ->{
                 if (caminho != null){
-                    if (btnAnexar != null){
+                    if (btnAnexar != null && paga != null && adapter != null){
                         btnAnexar.setText("Imagem anexada");
                         paga.setTextColor(Color.rgb(99,77,244));
                         adapter.receberUri(caminho);
@@ -66,21 +67,13 @@ public class SalaInicio extends AppCompatActivity {
 
     private void carregarHome() {
         carregando.setVisibility(View.VISIBLE);
-        RepositorioSupabase repo = RepositorioSupabase.get();
 
-        repo.carregarSalas(new RepositorioSupabase.Resposta<List<Sala>>() {
+        RepositorioSupabase.get().carregarSala(salaId, new RepositorioSupabase.Resposta<Sala>() {
             @Override
-            public void sucesso(List<Sala> salas) {
-                if (salas.isEmpty()) {
-                    carregando.setVisibility(View.GONE);
-                    Toast.makeText(SalaInicio.this, "Você ainda não está em nenhuma sala.",
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-                salaAtual = salas.get(0);
-                atualizarEngrenagem(salaAtual);
-                carregarDadosDaSala(salaAtual);
-                carregarDadosDaSala(salas.get(0));
+            public void sucesso(Sala sala) {
+                salaAtual = sala;
+                atualizarEngrenagem(sala);
+                carregarDadosDaSala(sala);
             }
 
             @Override
@@ -128,13 +121,14 @@ public class SalaInicio extends AppCompatActivity {
                 .setAdapter(new ConfirmacaoAdapter(aConfirmar));
         ((RecyclerView) findViewById(R.id.listaTransferir))
                 .setAdapter(new transferenciaAdapter(aTransferir));
-        ((RecyclerView) findViewById(R.id.listaResponsavel))
-                .setAdapter(new responsavelAdapter(responsavel, (item, btnAnexar, paga) ->{
-                    this.item = item;
-                    this.btnAnexar = btnAnexar;
-                    this.paga = paga;
-                    pegarImg.launch("image/*");
-                }));
+        // Guardado no campo "adapter" pra o pegarImg conseguir entregar a imagem a ele
+        adapter = new responsavelAdapter(responsavel, (item, btnAnexar, paga) -> {
+            this.item = item;
+            this.btnAnexar = btnAnexar;
+            this.paga = paga;
+            pegarImg.launch("image/*");
+        });
+        ((RecyclerView) findViewById(R.id.listaResponsavel)).setAdapter(adapter);
 
         mostrar(!aConfirmar.isEmpty(),
                 R.id.tituloConfirmar, R.id.subTituloConfirmar, R.id.listaConfirmar);
@@ -178,21 +172,13 @@ public class SalaInicio extends AppCompatActivity {
 
         carregando = findViewById(R.id.carregando);
 
-        carregando.setVisibility(View.VISIBLE);
+        // O login agora acontece na MainActivity, antes de chegar aqui
+        salaId = getIntent().getStringExtra("salaId");
+        if (salaId == null || !Sessao.estaLogado()) {
+            finish();
+            return;
+        }
 
-        AuthApi.entrar("teste1@exemplo.com", "senha12345", new AuthApi.Retorno() {
-            @Override
-            public void sucesso() {
-                runOnUiThread(() -> carregarHome());
-            }
-
-            @Override
-            public void erro(String mensagem) {
-                runOnUiThread(() -> {
-                    carregando.setVisibility(View.GONE);
-                    Toast.makeText(SalaInicio.this, mensagem, Toast.LENGTH_LONG).show();
-                });
-            }
-        });
+        carregarHome();
     }
 }
