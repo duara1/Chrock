@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.Adapter.contribuintesAdapter;
 import com.example.chrock.data.Sessao;
+import com.example.chrock.util.Acesso;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.StatusContribuicao;
 import com.example.chrock.model.Usuario;
@@ -42,8 +43,10 @@ public class despesa_informacoes extends AppCompatActivity {
             return insets;
         });
 
+        if (!Acesso.exigirLogin(this)) return;
+
         String despesaId = getIntent().getStringExtra("id");
-        if (despesaId == null || !Sessao.estaLogado()) {
+        if (despesaId == null) {
             finish();
             return;
         }
@@ -108,13 +111,6 @@ public class despesa_informacoes extends AppCompatActivity {
         String eu = Sessao.getUsuarioId();
         boolean souResponsavel = item.getResponsavelId().equals(eu);
 
-        // Os dois botões ("Copiar pix" e "Sinalizar transferência") só aparecem pra
-        // quem ainda precisa transferir:
-        //  - a conta ainda não foi paga (sem comprovante)
-        //  - a pessoa não é o responsável
-        //  - a pessoa divide essa conta
-        //  - ainda não avisou que transferiu (PENDENTE), ou o responsável contestou (CONTESTADO)
-        // Depois de sinalizar, ou quando a conta é paga, os dois somem.
         boolean precisaTransferir = !item.isConcluida()
                 && !souResponsavel
                 && item.isContribuente(eu)
@@ -148,7 +144,6 @@ public class despesa_informacoes extends AppCompatActivity {
                 if (isFinishing() || isDestroyed()) return;
                 Toast.makeText(despesa_informacoes.this, "Transferência sinalizada!",
                         Toast.LENGTH_SHORT).show();
-                // Volta pra sala, que recarrega e tira a conta de "Você precisa transferir"
                 finish();
             }
 

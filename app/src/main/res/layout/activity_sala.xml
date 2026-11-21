@@ -476,7 +476,6 @@
         android:paddingTop="10dp"
         android:paddingBottom="9dp">
 
-        <!-- Aba ATUAL: ícone roxo -->
         <TextView
             android:id="@+id/abaInicio"
             android:layout_width="0dp"
@@ -494,7 +493,6 @@
             android:textColor="@color/black"
             android:textSize="13sp"/>
 
-        <!-- Aba normal: ícone preto -->
         <TextView
             android:id="@+id/abaHistorico"
             android:layout_width="0dp"

@@ -5,6 +5,8 @@ import android.os.Looper;
 
 import com.example.chrock.data.Api;
 import com.example.chrock.data.Conversor;
+import com.example.chrock.data.Sessao;
+import com.example.chrock.data.SupabaseConfig;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.Sala;
 import com.example.chrock.model.Usuario;
@@ -18,7 +20,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 public class RepositorioSupabase {
 
@@ -26,6 +30,11 @@ public class RepositorioSupabase {
         void sucesso(T dado);
         void erro(String mensagem);
     }
+
+    public static final String SEM_ACESSO = "Você não faz parte desta sala.";
+    public static final String SALA_NAO_ENCONTRADA = "Sala não encontrada.";
+
+    private static final String BUCKET_SALAS = "salas";
 
     private static final Handler TELA = new Handler(Looper.getMainLooper());
     private static RepositorioSupabase instancia;
@@ -50,9 +59,11 @@ public class RepositorioSupabase {
                     public void sucesso(String corpo) {
                         try {
                             JSONArray lista = new JSONArray(corpo);
+                            String eu = Sessao.getUsuarioId();
                             List<Sala> salas = new ArrayList<>();
                             for (int i = 0; i < lista.length(); i++) {
-                                salas.add(Conversor.sala(lista.getJSONObject(i)));
+                                Sala sala = Conversor.sala(lista.getJSONObject(i));
+                                if (sala.isMembro(eu)) salas.add(sala);
                             }
                             entregar(resposta, salas);
                         } catch (JSONException | RuntimeException e) {
@@ -107,8 +118,6 @@ public class RepositorioSupabase {
                             Map<String, Usuario> usuarios = new LinkedHashMap<>();
                             for (int i = 0; i < lista.length(); i++) {
                                 JSONObject linha = lista.getJSONObject(i);
-                                // Se o banco esconder o perfil (regra RLS), pula essa pessoa
-                                // em vez de derrubar a tela inteira. O nome vira "Alguém".
                                 if (linha.isNull("profiles")) continue;
                                 Usuario u = Conversor.usuario(linha.getJSONObject("profiles"));
                                 usuarios.put(u.getId(), u);
@@ -168,10 +177,15 @@ public class RepositorioSupabase {
                         try {
                             JSONArray lista = new JSONArray(corpo);
                             if (lista.length() == 0) {
-                                falhar(resposta, "Sala não encontrada.");
+                                falhar(resposta, SALA_NAO_ENCONTRADA);
                                 return;
                             }
-                            entregar(resposta, Conversor.sala(lista.getJSONObject(0)));
+                            Sala sala = Conversor.sala(lista.getJSONObject(0));
+                            if (!sala.isMembro(Sessao.getUsuarioId())) {
+                                falhar(resposta, SEM_ACESSO);
+                                return;
+                            }
+                            entregar(resposta, sala);
                         } catch (JSONException | RuntimeException e) {
                             falhar(resposta, "Resposta inesperada do servidor.");
                         }
@@ -182,6 +196,37 @@ public class RepositorioSupabase {
                         falhar(resposta, mensagem);
                     }
                 });
+    }
+
+    public void criarSalaComImagem(String titulo, String descricao, byte[] imagemJpeg,
+                                   Resposta<String> resposta) {
+        if (imagemJpeg == null) {
+            criarSala(titulo, descricao, null, resposta);
+            return;
+        }
+
+        String caminho = Sessao.getUsuarioId() + "/" + UUID.randomUUID() + ".jpg";
+
+        Api.enviarArquivo(BUCKET_SALAS, caminho, imagemJpeg, "image/jpeg", new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                String endereco = SupabaseConfig.URL + "/storage/v1/object/public/"
+                        + BUCKET_SALAS + "/" + caminho;
+                criarSala(titulo, descricao, endereco, resposta);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                String m = mensagem.toLowerCase(Locale.ROOT);
+                if (m.contains("bucket not found")) {
+                    falhar(resposta, "O bucket \"salas\" não existe no Supabase (rode o supabase_imagens.sql).");
+                } else if (m.contains("row-level security")) {
+                    falhar(resposta, "O Supabase não deixou enviar a imagem (falta a política do bucket \"salas\").");
+                } else {
+                    falhar(resposta, mensagem);
+                }
+            }
+        });
     }
 
     public void criarSala(String titulo, String descricao, String img, Resposta<String> resposta) {
@@ -237,8 +282,6 @@ public class RepositorioSupabase {
         });
     }
 
-    // Entra na sala que tem esse código. Devolve o id da sala.
-    // Quem confere o código e coloca a pessoa na sala é a função entrar_na_sala do banco.
     public void entrarComCodigo(String codigo, Resposta<String> resposta) {
         JSONObject args = new JSONObject();
         try {
@@ -261,9 +304,6 @@ public class RepositorioSupabase {
         });
     }
 
-    // Responsável pagou a conta: 1) envia a foto do comprovante pro Storage,
-    // 2) chama registrar_pagamento, que marca a despesa como paga no banco.
-    // A foto fica em: comprovantes/<id da sala>/<id da despesa>/comprovante.jpg
     public void registrarPagamento(Despesa despesa, byte[] fotoJpeg, Resposta<Void> resposta) {
         String caminho = despesa.getSalaId() + "/" + despesa.getDespesaId() + "/comprovante.jpg";
 
@@ -299,7 +339,6 @@ public class RepositorioSupabase {
         });
     }
 
-    // Contribuinte avisa que já mandou o Pix pro responsável
     public void sinalizarTransferencia(String despesaId, Resposta<Void> resposta) {
         JSONObject args = new JSONObject();
         try {

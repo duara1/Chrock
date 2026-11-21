@@ -29,7 +29,6 @@ public class Conversor {
         JSONArray lista = j.getJSONArray("sala_membros");
         for (int i = 0; i < lista.length(); i++) {
             JSONObject m = lista.getJSONObject(i);
-            // toUpperCase: aceita "moderador" ou "MODERADOR" vindo do banco
             membros.put(m.getString("usuario_id"),
                     Papel.valueOf(m.getString("papel").trim().toUpperCase(Locale.ROOT)));
         }

@@ -54,8 +54,6 @@ public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHold
         }
         holder.itemView.setOnClickListener(v -> {
 
-            //String idUsuario = usuarioAtual.getId();
-
             if (usuariosSelecionados.contains(idUsuario)) {
                 usuariosSelecionados.remove(idUsuario);
             } else {

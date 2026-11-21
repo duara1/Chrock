@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.chrock.data.Sessao;
+import com.example.chrock.util.Acesso;
 
 public class historico extends AppCompatActivity {
     String salaId;
@@ -24,13 +25,14 @@ public class historico extends AppCompatActivity {
             return insets;
         });
 
+        if (!Acesso.exigirLogin(this)) return;
+
         salaId = getIntent().getStringExtra("salaId");
-        if (salaId == null || !Sessao.estaLogado()) {
+        if (salaId == null) {
             finish();
             return;
         }
         findViewById(R.id.abaInicio).setOnClickListener(v -> finish());
 
-        // O Histórico não faz nada aqui, porque a pessoa já está nele.
     }
 }

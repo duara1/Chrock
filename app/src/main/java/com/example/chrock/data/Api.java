@@ -81,6 +81,7 @@ public class Api {
                 if (resposta.isSuccessful()) {
                     resultado.sucesso(texto);
                 } else if (resposta.code() == 401) {
+                    Sessao.encerrar();
                     resultado.erro("Sua sessão expirou. Entre de novo.");
                 } else {
                     resultado.erro(mensagemDeErro(texto));
@@ -94,7 +95,6 @@ public class Api {
             JSONObject json = new JSONObject(texto);
             if (json.has("message")) return json.getString("message");
         } catch (JSONException e) {
-            // o corpo não era um JSON: cai na mensagem genérica abaixo
         }
         return "Não foi possível concluir. Tente de novo.";
     }

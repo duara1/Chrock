@@ -20,17 +20,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.Adapter.SalasAdapter;
-import com.example.chrock.data.AuthApi;
-import com.example.chrock.data.Sessao;
 import com.example.chrock.model.Sala;
 import com.example.chrock.repositorio.RepositorioSupabase;
+import com.example.chrock.util.Acesso;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final String EMAIL_TESTE = "teste1@exemplo.com";
-    private static final String SENHA_TESTE = "senha12345";
 
     private final RepositorioSupabase repo = RepositorioSupabase.get();
 
@@ -41,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!Acesso.exigirLogin(this)) return;
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -57,35 +55,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button4).setOnClickListener(v ->
                 startActivity(new Intent(this, criarSala.class)));
 
-        if (Sessao.estaLogado()) {
-            carregarSalas();
-        } else {
-            entrar();
-        }
+        carregarSalas();
     }
+
     @Override
     protected void onRestart() {
         super.onRestart();
-        if (Sessao.estaLogado()) carregarSalas();
-    }
-
-    private void entrar() {
-        carregando.setVisibility(View.VISIBLE);
-
-        AuthApi.entrar(EMAIL_TESTE, SENHA_TESTE, new AuthApi.Retorno() {
-            @Override
-            public void sucesso() {
-                runOnUiThread(() -> carregarSalas());
-            }
-
-            @Override
-            public void erro(String mensagem) {
-                runOnUiThread(() -> {
-                    carregando.setVisibility(View.GONE);
-                    Toast.makeText(MainActivity.this, mensagem, Toast.LENGTH_LONG).show();
-                });
-            }
-        });
+        if (Acesso.exigirLogin(this)) carregarSalas();
     }
 
     private void carregarSalas() {

@@ -1,6 +1,5 @@
 package com.example.chrock.Adapter;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.R;
+import com.example.chrock.data.Sessao;
 import com.example.chrock.model.Sala;
 import com.example.chrock.util.Animacao;
+import com.example.chrock.util.ImagemSala;
 
 import java.util.List;
 
 public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.ViewHolder> {
 
-    // Quem usa o adapter (a MainActivity) decide o que fazer quando clicam numa sala
     public interface AoClicar {
         void abrir(Sala sala);
     }
@@ -33,12 +33,14 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.ViewHolder> 
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imagem;
+        ImageView sapo;
         TextView titulo;
         TextView descricao;
 
         ViewHolder(View card) {
             super(card);
             imagem = card.findViewById(R.id.imgSala);
+            sapo = card.findViewById(R.id.imgSapo);
             titulo = card.findViewById(R.id.titulo);
             descricao = card.findViewById(R.id.descricao);
             Animacao.efeitoApertar(card);
@@ -61,7 +63,8 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.ViewHolder> 
         String descricao = sala.getDescricao();
         h.descricao.setText(descricao == null || descricao.isEmpty() ? "Sem descrição" : descricao);
 
-        mostrarImagem(h.imagem, sala.getImg());
+        ImagemSala.mostrarOuEsconder(h.imagem, sala.getImg());
+        mostrarSapoSeAdm(h, sala);
 
         h.itemView.setContentDescription("Sala " + sala.getTitulo());
         h.itemView.setOnClickListener(v -> {
@@ -71,18 +74,16 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.ViewHolder> 
         });
     }
 
-    // A imagem só aparece se ela abrir neste celular.
-    // Se não tiver imagem (ou ela não abrir), o espaço some em vez de ficar um buraco vazio.
-    private void mostrarImagem(ImageView imagem, Uri uri) {
-        imagem.setImageDrawable(null);
-        if (uri != null && !uri.toString().isEmpty()) {
-            try {
-                imagem.setImageURI(uri);
-            } catch (RuntimeException e) {
-                imagem.setImageDrawable(null);
-            }
-        }
-        imagem.setVisibility(imagem.getDrawable() != null ? View.VISIBLE : View.GONE);
+    private void mostrarSapoSeAdm(ViewHolder h, Sala sala) {
+        String eu = Sessao.getUsuarioId();
+        boolean souAdm = eu != null && eu.equals(sala.getADMId());
+
+        h.sapo.setVisibility(souAdm ? View.VISIBLE : View.GONE);
+
+        float densidade = h.descricao.getResources().getDisplayMetrics().density;
+        int lado = (int) (10 * densidade);
+        int fim = souAdm ? (int) (64 * densidade) : lado;
+        h.descricao.setPadding(lado, lado, fim, lado);
     }
 
     @Override

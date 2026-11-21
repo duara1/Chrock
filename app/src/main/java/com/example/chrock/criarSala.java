@@ -22,11 +22,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.Adapter.ParticipantesAdapter;
 import com.example.chrock.data.Sessao;
+import com.example.chrock.util.Acesso;
+import com.example.chrock.util.Imagem;
+import com.example.chrock.util.ImagemSala;
 import com.example.chrock.model.Papel;
 import com.example.chrock.model.Sala;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioSupabase;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,10 +71,7 @@ public class criarSala extends AppCompatActivity {
             return insets;
         });
 
-        if (!Sessao.estaLogado()) {
-            finish();
-            return;
-        }
+        if (!Acesso.exigirLogin(this)) return;
 
         campoTitulo = findViewById(R.id.editTextText);
         campoDescricao = findViewById(R.id.editDescricao);
@@ -109,7 +110,24 @@ public class criarSala extends AppCompatActivity {
         botaoSalvar.setEnabled(false);
         carregando.setVisibility(View.VISIBLE);
 
-        repo.criarSala(titulo, descricao, imagem != null ? imagem.toString() : null,
+        if (imagem == null) {
+            enviarCriacao(titulo, descricao, null);
+            return;
+        }
+
+        Uri escolhida = imagem;
+        new Thread(() -> {
+            try {
+                byte[] jpeg = Imagem.prepararJpeg(getContentResolver(), escolhida);
+                runOnUiThread(() -> enviarCriacao(titulo, descricao, jpeg));
+            } catch (IOException | RuntimeException e) {
+                runOnUiThread(() -> falharAoSalvar("Não consegui ler essa imagem."));
+            }
+        }).start();
+    }
+
+    private void enviarCriacao(String titulo, String descricao, byte[] jpeg) {
+        repo.criarSalaComImagem(titulo, descricao, jpeg,
                 new RepositorioSupabase.Resposta<String>() {
                     @Override
                     public void sucesso(String id) {
@@ -172,12 +190,7 @@ public class criarSala extends AppCompatActivity {
         campoTitulo.setText(sala.getTitulo());
         campoDescricao.setText(sala.getDescricao());
 
-        if (sala.getImg() != null && !sala.getImg().toString().isEmpty()) {
-            try {
-                botaoImagem.setImageURI(sala.getImg());
-            } catch (RuntimeException e) {
-            }
-        }
+        ImagemSala.mostrar(botaoImagem, sala.getImg());
 
         carregando.setVisibility(View.GONE);
 

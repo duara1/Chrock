@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chrock.Adapter.UsuarioAdapter;
 import com.example.chrock.data.Sessao;
+import com.example.chrock.util.Acesso;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioSupabase;
 
@@ -32,7 +33,6 @@ import java.util.Locale;
 
 public class criar_despesa extends AppCompatActivity {
 
-    // A sala onde a despesa vai ser criada (o SalaInicio manda pelo Intent)
     private String salaId;
 
     private RecyclerView recyclerUsuarios;
@@ -56,8 +56,10 @@ public class criar_despesa extends AppCompatActivity {
         });
 
 
+        if (!Acesso.exigirLogin(this)) return;
+
         salaId = getIntent().getStringExtra("salaId");
-        if (salaId == null || !Sessao.estaLogado()) {
+        if (salaId == null) {
             finish();
             return;
         }
@@ -81,7 +83,6 @@ public class criar_despesa extends AppCompatActivity {
             verificarSelecionados();
         });
 
-        // Setinha: fecha esta tela e mostra a SalaInicio, que continua aberta por baixo
         findViewById(R.id.btnVoltar).setOnClickListener(v -> finish());
     }
 

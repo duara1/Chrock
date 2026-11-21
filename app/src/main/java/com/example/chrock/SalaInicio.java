@@ -26,6 +26,7 @@ import com.example.chrock.Adapter.ConfirmacaoAdapter;
 import com.example.chrock.Adapter.responsavelAdapter;
 import com.example.chrock.Adapter.transferenciaAdapter;
 import com.example.chrock.data.Sessao;
+import com.example.chrock.util.Acesso;
 import com.example.chrock.model.Despesa;
 import com.example.chrock.model.ItemConfirmacao;
 import com.example.chrock.model.Papel;
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SalaInicio extends AppCompatActivity {
-    // A sala que a MainActivity mandou abrir
     private String salaId;
     private responsavelAdapter adapter;
     private ProgressBar carregando;
@@ -53,7 +53,6 @@ public class SalaInicio extends AppCompatActivity {
     private Despesa item;
     private Button btnAnexar;
     private  Button paga;
-    // true enquanto a galeria está aberta (ver onRestart)
     private boolean escolhendoImagem = false;
     private ActivityResultLauncher<String> pegarImg = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -69,7 +68,6 @@ public class SalaInicio extends AppCompatActivity {
             }
     );
 
-    // Mostra ou esconde os botões conforme o papel de quem está logado
     private void atualizarBotoesDoPapel(Sala sala) {
         String eu = Sessao.getUsuarioId();
         Papel papel = sala.isMembro(eu) ? sala.getPapel(eu) : Papel.PARTICIPANTE;
@@ -77,11 +75,8 @@ public class SalaInicio extends AppCompatActivity {
         boolean souAdm = papel == Papel.ADM;
         boolean souAdmOuModerador = papel == Papel.ADM || papel == Papel.MODERADOR;
 
-        // Engrenagem: só o ADM
         findViewById(R.id.btnConfig).setVisibility(souAdm ? View.VISIBLE : View.GONE);
-        // Código da sala: ADM e moderador
         findViewById(R.id.codigoSala).setVisibility(souAdmOuModerador ? View.VISIBLE : View.GONE);
-        // Criar despesa: ADM e moderador (o banco também só deixa eles criarem)
         findViewById(R.id.criarDespesa).setVisibility(souAdmOuModerador ? View.VISIBLE : View.GONE);
     }
 
@@ -96,8 +91,6 @@ public class SalaInicio extends AppCompatActivity {
         Toast.makeText(this, "Código copiado", Toast.LENGTH_SHORT).show();
     }
 
-    // Preenche os dois cards de cima: o Pessoal (só a parte de quem está logado)
-    // e o da Sala (todas as contas da sala)
     private void preencherResumo(List<Despesa> despesas) {
         String eu = Sessao.getUsuarioId();
 
@@ -107,15 +100,11 @@ public class SalaInicio extends AppCompatActivity {
         int pagoSala = 0;
 
         for (Despesa d : despesas) {
-            // Sala: a conta inteira. Paga quando o responsável já registrou o comprovante
             totalSala += d.getTotalEmInt();
             if (d.isConcluida()) {
                 pagoSala += d.getTotalEmInt();
             }
 
-            // Pessoal: só a minha parte, nas contas que eu divido.
-            // Conta como paga quando o responsável confirmou que recebeu (CONFIRMADO)
-            // ou quando a conta inteira já foi paga (aí não tem mais nada pendente)
             if (d.isContribuente(eu)) {
                 int minhaParte = d.getValorATransferirEmInt(eu);
                 totalPessoal += minhaParte;
@@ -129,7 +118,7 @@ public class SalaInicio extends AppCompatActivity {
         escreverValor(R.id.pagValorPessoal, pagoPessoal);
         escreverValor(R.id.pendValorPessoal, totalPessoal - pagoPessoal);
 
-        escreverValor(R.id.pagoValorSala, totalSala);   // é o Total da sala (id com nome antigo)
+        escreverValor(R.id.pagoValorSala, totalSala);
         escreverValor(R.id.pagValorSala, pagoSala);
         escreverValor(R.id.pendValorSala, totalSala - pagoSala);
     }
@@ -157,6 +146,10 @@ public class SalaInicio extends AppCompatActivity {
             @Override
             public void erro(String mensagem) {
                 falhaNaHome(mensagem);
+                if (RepositorioSupabase.SEM_ACESSO.equals(mensagem)
+                        || RepositorioSupabase.SALA_NAO_ENCONTRADA.equals(mensagem)) {
+                    finish();
+                }
             }
         });
     }
@@ -201,7 +194,6 @@ public class SalaInicio extends AppCompatActivity {
                 .setAdapter(new ConfirmacaoAdapter(aConfirmar));
         ((RecyclerView) findViewById(R.id.listaTransferir))
                 .setAdapter(new transferenciaAdapter(aTransferir));
-        // Guardado no campo "adapter" pra o pegarImg conseguir entregar a imagem a ele
         adapter = new responsavelAdapter(responsavel,
                 (item, btnAnexar, paga) -> {
                     this.item = item;
@@ -223,8 +215,6 @@ public class SalaInicio extends AppCompatActivity {
         carregando.setVisibility(View.GONE);
     }
 
-    // Diminui a foto (fora da thread da tela, porque demora) e envia pro banco.
-    // Se der certo, a despesa sai de "Você é responsável por pagar" e vai pro histórico.
     private void pagarConta(Despesa item, Uri comprovante, Dialog popUp, Button botaoPaga) {
         new Thread(() -> {
             try {
@@ -260,13 +250,11 @@ public class SalaInicio extends AppCompatActivity {
         Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
     }
 
-    // Quando a pessoa volta pra esta tela (ex.: depois de sinalizar uma transferência
-    // na tela da despesa), recarrega pra a conta sair da lista certa.
-    // Não recarrega quando a volta é da galeria, senão o pop-up perderia a imagem.
     @Override
     protected void onRestart() {
         super.onRestart();
-        if (!escolhendoImagem && salaId != null && Sessao.estaLogado()) carregarHome();
+        if (escolhendoImagem || salaId == null) return;
+        if (Acesso.exigirLogin(this)) carregarHome();
     }
 
     private void mostrar(boolean visivel, int... ids) {
@@ -301,31 +289,27 @@ public class SalaInicio extends AppCompatActivity {
 
         findViewById(R.id.codigoSala).setOnClickListener(v -> copiarCodigo());
 
-        // Abre a tela de criar despesa NESTA sala.
-        // Quando ela fechar, o onRestart recarrega a sala e a despesa nova aparece.
         findViewById(R.id.criarDespesa).setOnClickListener(v -> {
             Intent i = new Intent(this, criar_despesa.class);
             i.putExtra("salaId", salaId);
             startActivity(i);
         });
 
-        // Menu de baixo: Histórico abre a tela de histórico DESTA sala.
-        // O Início não faz nada aqui, porque a pessoa já está nele.
         findViewById(R.id.abaHistorico).setOnClickListener(v -> {
             Intent i = new Intent(this, historico.class);
             i.putExtra("salaId", salaId);
             startActivity(i);
         });
 
-        // Data de hoje, ao lado do botão "Código da sala"
         ((TextView) findViewById(R.id.data)).setText(
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         carregando = findViewById(R.id.carregando);
 
-        // O login agora acontece na MainActivity, antes de chegar aqui
+        if (!Acesso.exigirLogin(this)) return;
+
         salaId = getIntent().getStringExtra("salaId");
-        if (salaId == null || !Sessao.estaLogado()) {
+        if (salaId == null) {
             finish();
             return;
         }
