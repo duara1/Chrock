@@ -40,9 +40,17 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
     }
     private clikAnexar ouvinte;
 
-    public responsavelAdapter(List<Despesa> itens, clikAnexar ouvinte){
+    // Chamado quando o responsável aperta "Conta paga" com a imagem anexada.
+    // Quem implementa (o SalaInicio) envia pro banco e fecha o pop-up se der certo.
+    public interface AoPagar {
+        void pagar(Despesa item, Uri comprovante, Dialog popUp, Button botaoPaga);
+    }
+    private final AoPagar aoPagar;
+
+    public responsavelAdapter(List<Despesa> itens, clikAnexar ouvinte, AoPagar aoPagar){
         this.itens = itens;
         this.ouvinte = ouvinte;
+        this.aoPagar = aoPagar;
     }
 
     public void receberUri(Uri img){
@@ -158,13 +166,13 @@ public class responsavelAdapter extends RecyclerView.Adapter<responsavelAdapter.
             });
 
             contaPaga.setOnClickListener(vP -> {
-                // Só usa a imagem se ela foi anexada NESTA despesa
-                if (img != null && despesaAbertaPopUp == item){
-                    // Provisório: muda só no celular. Falta salvar no Supabase (Storage).
-                    item.setComprovante(img);
-                }
-                notifyDataSetChanged();
-                popUp.dismiss();
+                // Só paga se a imagem foi anexada NESTA despesa
+                if (img == null || despesaAbertaPopUp != item) return;
+
+                // Desliga o botão enquanto envia, pra não pagar duas vezes
+                contaPaga.setEnabled(false);
+                contaPaga.setText("Enviando...");
+                aoPagar.pagar(item, img, popUp, contaPaga);
             });
 
             sair.setOnClickListener(vS ->{

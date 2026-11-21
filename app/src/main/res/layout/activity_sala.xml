@@ -313,7 +313,9 @@
             android:textColor="@color/roxoEscrita"
             android:textSize="14sp"
             app:backgroundTint="@color/fundoClaro"
-            app:rippleColor="#207467CA" />
+            app:rippleColor="#207467CA"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <TextView
             android:id="@+id/data"
@@ -474,6 +476,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="9dp">
 
+        <!-- Aba ATUAL: ícone roxo -->
         <TextView
             android:id="@+id/abaInicio"
             android:layout_width="0dp"
@@ -483,13 +486,15 @@
             android:focusable="true"
             android:minHeight="48dp"
             app:drawableTopCompat="@drawable/inicio"
+            app:drawableTint="@color/roxoEscrita"
             android:text="Início"
+            android:contentDescription="Início, tela atual"
             android:gravity="center"
             android:stateListAnimator="@drawable/anima"
             android:textColor="@color/black"
-            android:drawableTint="@color/black"
             android:textSize="13sp"/>
 
+        <!-- Aba normal: ícone preto -->
         <TextView
             android:id="@+id/abaHistorico"
             android:layout_width="0dp"
@@ -497,13 +502,13 @@
             android:layout_weight="1"
             android:clickable="true"
             android:focusable="true"
+            android:minHeight="48dp"
             app:drawableTopCompat="@drawable/historico"
+            app:drawableTint="@color/black"
             android:text="Histórico"
             android:gravity="center"
-            android:minHeight="48dp"
             android:stateListAnimator="@drawable/anima"
             android:textColor="@color/black"
-            android:drawableTint="@color/black"
             android:textSize="13sp"/>
     </LinearLayout>
 

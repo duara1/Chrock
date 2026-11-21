@@ -45,6 +45,22 @@ public class Api {
         executar(pedido, resultado);
     }
 
+    // Envia um arquivo (ex.: a foto do comprovante) pro Storage do Supabase.
+    // x-upsert = true: se já existir um arquivo nesse caminho, ele é trocado
+    // (útil se a pessoa tentar de novo depois de uma falha).
+    public static void enviarArquivo(String bucket, String caminho, byte[] dados,
+                                     String tipo, Resultado resultado) {
+        if (!Sessao.estaLogado()) {
+            resultado.erro("Faça login primeiro.");
+            return;
+        }
+        Request pedido = comCabecalhos("/storage/v1/object/" + bucket + "/" + caminho)
+                .addHeader("x-upsert", "true")
+                .post(RequestBody.create(dados, MediaType.get(tipo)))
+                .build();
+        executar(pedido, resultado);
+    }
+
     private static Request.Builder comCabecalhos(String caminho) {
         return new Request.Builder()
                 .url(SupabaseConfig.URL + caminho)

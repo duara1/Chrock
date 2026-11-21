@@ -29,33 +29,36 @@
         app:layout_constraintTop_toTopOf="@+id/view"
         app:srcCompat="@drawable/logo" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Entrar com código"
-        android:backgroundTint="@color/roxoBtn"
         android:background="@drawable/btn_tela_inicial"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingHorizontal="20dp"
+        android:textAllCaps="false"
         android:layout_marginTop="15dp"
         android:textSize="15sp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Criar uma sala"
         android:background="@drawable/btn_tela_inicial"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingHorizontal="20dp"
+        android:textAllCaps="false"
         android:layout_marginTop="15dp"
         android:textSize="15sp"
-        android:backgroundTint="@color/roxoBtn"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button3" />
 
-    <!-- Altura 0dp + Top e Bottom: a lista ocupa o resto da tela e rola sozinha -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listaSalas"
         android:layout_width="0dp"
@@ -72,6 +75,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/salas"
         tools:itemCount="3" />
+
     <TextView
         android:id="@+id/vazio"
         android:layout_width="0dp"

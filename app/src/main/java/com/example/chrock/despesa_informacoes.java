@@ -1,7 +1,10 @@
 package com.example.chrock;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chrock.Adapter.contribuintesAdapter;
 import com.example.chrock.data.Sessao;
 import com.example.chrock.model.Despesa;
+import com.example.chrock.model.StatusContribuicao;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Formatar;
@@ -95,7 +99,67 @@ public class despesa_informacoes extends AppCompatActivity {
         RecyclerView listaContribuintes = findViewById(R.id.listaContribuintes);
         listaContribuintes.setAdapter(new contribuintesAdapter(item.getContribuintes()));
 
+        prepararBotoes(item, resp);
+
         carregando.setVisibility(View.GONE);
+    }
+
+    private void prepararBotoes(Despesa item, Usuario resp) {
+        String eu = Sessao.getUsuarioId();
+        boolean souResponsavel = item.getResponsavelId().equals(eu);
+
+        // Os dois botões ("Copiar pix" e "Sinalizar transferência") só aparecem pra
+        // quem ainda precisa transferir:
+        //  - a conta ainda não foi paga (sem comprovante)
+        //  - a pessoa não é o responsável
+        //  - a pessoa divide essa conta
+        //  - ainda não avisou que transferiu (PENDENTE), ou o responsável contestou (CONTESTADO)
+        // Depois de sinalizar, ou quando a conta é paga, os dois somem.
+        boolean precisaTransferir = !item.isConcluida()
+                && !souResponsavel
+                && item.isContribuente(eu)
+                && (item.getStatus(eu) == StatusContribuicao.PENDENTE
+                || item.getStatus(eu) == StatusContribuicao.CONTESTADO);
+
+        Button btnPix = findViewById(R.id.btnPix);
+        boolean temPix = resp != null && !resp.getPix().isEmpty();
+        btnPix.setVisibility(precisaTransferir && temPix ? View.VISIBLE : View.GONE);
+        btnPix.setOnClickListener(v -> copiarPix(resp.getPix()));
+
+        Button btnSinalizar = findViewById(R.id.sinalizar);
+        btnSinalizar.setVisibility(precisaTransferir ? View.VISIBLE : View.GONE);
+        btnSinalizar.setOnClickListener(v -> sinalizar(item, btnSinalizar));
+    }
+
+    private void copiarPix(String pix) {
+        ClipboardManager areaDeTransferencia = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        if (areaDeTransferencia == null) return;
+        areaDeTransferencia.setPrimaryClip(ClipData.newPlainText("Pix", pix));
+        Toast.makeText(this, "Pix copiado", Toast.LENGTH_SHORT).show();
+    }
+
+    private void sinalizar(Despesa item, Button btnSinalizar) {
+        btnSinalizar.setEnabled(false);
+        carregando.setVisibility(View.VISIBLE);
+
+        repo.sinalizarTransferencia(item.getDespesaId(), new RepositorioSupabase.Resposta<Void>() {
+            @Override
+            public void sucesso(Void nada) {
+                if (isFinishing() || isDestroyed()) return;
+                Toast.makeText(despesa_informacoes.this, "Transferência sinalizada!",
+                        Toast.LENGTH_SHORT).show();
+                // Volta pra sala, que recarrega e tira a conta de "Você precisa transferir"
+                finish();
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                if (isFinishing() || isDestroyed()) return;
+                carregando.setVisibility(View.GONE);
+                btnSinalizar.setEnabled(true);
+                Toast.makeText(despesa_informacoes.this, mensagem, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void falhar(String mensagem) {

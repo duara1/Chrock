@@ -260,6 +260,67 @@ public class RepositorioSupabase {
         });
     }
 
+    // Responsável pagou a conta: 1) envia a foto do comprovante pro Storage,
+    // 2) chama registrar_pagamento, que marca a despesa como paga no banco.
+    // A foto fica em: comprovantes/<id da sala>/<id da despesa>/comprovante.jpg
+    public void registrarPagamento(Despesa despesa, byte[] fotoJpeg, Resposta<Void> resposta) {
+        String caminho = despesa.getSalaId() + "/" + despesa.getDespesaId() + "/comprovante.jpg";
+
+        Api.enviarArquivo("comprovantes", caminho, fotoJpeg, "image/jpeg", new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                JSONObject args = new JSONObject();
+                try {
+                    args.put("p_despesa", despesa.getDespesaId());
+                    args.put("p_comprovante", caminho);
+                } catch (JSONException e) {
+                    falhar(resposta, "Dados inválidos.");
+                    return;
+                }
+
+                Api.rpc("registrar_pagamento", args, new Api.Resultado() {
+                    @Override
+                    public void sucesso(String corpo) {
+                        entregar(resposta, null);
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+                        falhar(resposta, mensagem);
+                    }
+                });
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
+    // Contribuinte avisa que já mandou o Pix pro responsável
+    public void sinalizarTransferencia(String despesaId, Resposta<Void> resposta) {
+        JSONObject args = new JSONObject();
+        try {
+            args.put("p_despesa", despesaId);
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc("sinalizar_transferencia", args, new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, null);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
     private static <T> void entregar(Resposta<T> resposta, T dado) {
         TELA.post(() -> resposta.sucesso(dado));
     }
