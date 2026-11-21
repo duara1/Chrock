@@ -8,6 +8,14 @@
     android:background="@color/white"
     tools:context=".criar_despesa">
 
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/onda_superior" />
+
     <ImageButton
         android:id="@+id/btnVoltar"
         android:layout_width="48dp"
@@ -19,5 +27,131 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_revert" />
+
+
+    <TextView
+        android:id="@+id/textViewTituloConta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="152dp"
+        android:text="Título da Conta:"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.146"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editTextTituloConta"
+        android:layout_width="315dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="1dp"
+        android:background="@drawable/borda_card"
+        android:textColor="@color/black"
+        android:ems="10"
+        android:hint="Nome"
+        android:inputType="text"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTituloConta" />
+
+    <TextView
+        android:id="@+id/textViewDataVencimento"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="33dp"
+        android:text="Data de vencimento:"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.169"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTituloConta" />
+
+    <EditText
+        android:id="@+id/editTextDataVencimento"
+        android:layout_width="315dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="3dp"
+        android:background="@drawable/borda_card"
+        android:ems="10"
+        android:hint="dd/mm/aaaa"
+        android:inputType="text"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDataVencimento" />
+
+
+    <TextView
+        android:id="@+id/textViewValorConta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="Valor da Conta:"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.152"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextDataVencimento" />
+
+    <EditText
+        android:id="@+id/editTextValorConta"
+        android:layout_width="315dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="1dp"
+        android:background="@drawable/borda_card"
+        android:ems="10"
+        android:hint="00.00"
+        android:inputType="text"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewValorConta" />
+
+    <TextView
+        android:id="@+id/textViewContribuinte"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="Quem contribui:"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.153"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextValorConta" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_usuario"
+        android:layout_width="318dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.516"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewContribuinte"
+        tools:listitem="@layout/molde_user" />
+
+    <Button
+        android:id="@+id/buttonCadastrar"
+        android:layout_width="158dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="16dp"
+        android:text="Cadastrar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_usuario"
+        app:layout_constraintVertical_bias="0.206" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

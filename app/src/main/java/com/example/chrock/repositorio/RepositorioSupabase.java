@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class RepositorioSupabase {
 
@@ -335,5 +336,49 @@ public class RepositorioSupabase {
 
     public Despesa getDespesa(String id) {
         return despesasEmCache.get(id);
+    }
+
+    public void criarDespesa(
+            String salaId,
+            String responsavelId,
+            String titulo,
+            int totalCentavos,
+            String vencimento,
+            Set<String> contribuintes,
+            Resposta<String> resposta
+    ) {
+        JSONObject args = new JSONObject();
+
+        try {
+            args.put("p_sala", salaId);
+            args.put("p_responsavel", responsavelId);
+            args.put("p_titulo", titulo);
+            args.put("p_total_centavos", totalCentavos);
+            args.put("p_vencimento", vencimento);
+
+            JSONArray listaContribuintes = new JSONArray();
+
+            for (String id : contribuintes) {
+                listaContribuintes.put(id);
+            }
+
+            args.put("p_contribuintes", listaContribuintes);
+
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc("criar_despesa", args, new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, corpo.replace("\"", "").trim());
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
     }
 }
