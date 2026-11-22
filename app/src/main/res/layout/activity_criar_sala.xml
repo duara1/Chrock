@@ -2,151 +2,162 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/criarSala"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CriarSalaActivity">
+    tools:context=".criarSala"
+    android:background="@color/white">
 
     <View
-        android:id="@+id/bgTop"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="@drawable/bg_borda_topo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <View
-        android:id="@+id/bgBottom"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:layout_marginBottom="0dp"
-        android:background="@drawable/bg_borda_baixo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <View
-        android:id="@+id/cardBrancoPrincipal"
+        android:id="@+id/view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="40dp"
-        android:background="@drawable/bg_card_branco"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/btnVoltar"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:background="@drawable/onda_superior"
+        android:importantForAccessibility="no"
+        app:layout_constraintHeight_percent="0.15"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/imagem_voltar" />
+        app:layout_constraintWidth_percent="0.75" />
 
-    <ImageView
-        android:id="@+id/cardImagem"
+    <View
         android:layout_width="0dp"
-        android:layout_height="160dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="32dp"
-        android:background="@color/gray_card_bg"
-        android:clickable="true"
-        android:focusable="true"
-        android:scaleType="centerCrop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/cardBrancoPrincipal" />
-
-    <ImageView
-        android:id="@+id/iconeImagem"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@android:drawable/ic_menu_gallery"
-        app:layout_constraintBottom_toBottomOf="@id/cardImagem"
-        app:layout_constraintEnd_toEndOf="@id/cardImagem"
-        app:layout_constraintStart_toStartOf="@id/cardImagem"
-        app:layout_constraintTop_toTopOf="@id/cardImagem" />
-
-    <TextView
-        android:id="@+id/lblTitulo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Título da sala:"
-        android:textColor="@color/black_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardImagem" />
-
-    <EditText
-        android:id="@+id/editTitulo"
-        android:layout_width="300dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="8dp"
-        android:backgroundTint="@color/gray_text_hint"
-        android:hint="Título da sala"
-        android:inputType="text"
-        android:paddingBottom="8dp"
-        android:textColor="@color/black_text"
-        android:textColorHint="@color/gray_text_hint"
-        android:textSize="18sp"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="@+id/bgBottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lblTitulo"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/lblDescricao"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="36dp"
-        android:text="Descrição"
-        android:textColor="@color/black_text"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTitulo" />
-
-    <EditText
-        android:id="@+id/editDescricao"
-        android:layout_width="311dp"
-        android:layout_height="108dp"
-        android:layout_marginTop="60dp"
-        android:background="@color/gray_card_bg"
-        android:gravity="top|start"
-        android:hint="Descrição da sala"
-        android:inputType="textMultiLine"
-        android:padding="12dp"
-        android:textColor="@color/black_text"
-        android:textColorHint="@color/gray_text_hint"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTitulo" />
-
-    <Button
-        android:id="@+id/btnSalvar"
-        android:layout_width="200dp"
-        android:layout_height="48dp"
-        android:text="Salvar"
-        android:textSize="16sp"
+        android:layout_height="0dp"
+        android:background="@drawable/onda_inferior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editDescricao"
-        app:layout_constraintVertical_bias="0.296" />
+        app:layout_constraintHeight_percent="0.15"
+        app:layout_constraintWidth_percent="0.75" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/retangulo_superior"
+        android:padding="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintHeight_percent="0.88"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.80">
+
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/imageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    app:srcCompat="@android:drawable/ic_menu_gallery" />
+
+                <TextView
+                    android:id="@+id/titulo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:textColor="@color/black"
+                    android:text="Título da sala"
+                    android:textSize="15sp" />
+
+                <EditText
+                    android:id="@+id/editTextText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ems="10"
+                    android:textColor="@color/black"
+                    android:hint="Título da sala"
+                    android:inputType="text" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:text="Descrição"
+                    android:textSize="15sp"
+                    android:textColor="@color/black" />
+
+
+                <EditText
+                    android:id="@+id/editDescricao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/gray_card_bg"
+                    android:gravity="top|start"
+                    android:hint="Descrição da sala"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="8"
+                    android:minHeight="110dp"
+                    android:minLines="5"
+                    android:layout_marginTop="5dp"
+                    android:padding="12dp"
+                    android:scrollbars="vertical"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/gray_text_hint"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/tituloModeradores"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="30dp"
+                    android:text="Escolha seus moderadores:"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/listaModeradores"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:listitem="@layout/item_participantes">
+
+                </androidx.recyclerview.widget.RecyclerView>
+
+                <Button
+                    android:id="@+id/btnSalvar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
+                    android:text="Criar"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/roxoBtn"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/carregando"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

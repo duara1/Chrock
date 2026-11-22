@@ -17,7 +17,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Foto da sala. Enquanto não houver imagem, aparece o fundo cinza -->
         <ImageView
             android:id="@+id/imgSala"
             android:layout_width="match_parent"

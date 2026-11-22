@@ -29,7 +29,7 @@ public class CriarSalaActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_criar_sala);
+        setContentView(R.layout.activity_criar_sala_master);
 
         btnVoltar = findViewById(R.id.btnVoltar);
         cardImagem = findViewById(R.id.cardImagem);

@@ -5,7 +5,100 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:circularflow_radiusInDP="100dp"
-    tools:context=".MainActivity">
+    android:background="@color/white">
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/onda"
+        android:importantForAccessibility="no"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.15"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.45" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:contentDescription="Chrock"
+        app:layout_constraintBottom_toBottomOf="@+id/view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view"
+        app:srcCompat="@drawable/logo" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Entrar com código"
+        android:background="@drawable/btn_tela_inicial"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingHorizontal="20dp"
+        android:textAllCaps="false"
+        android:layout_marginTop="15dp"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Criar uma sala"
+        android:background="@drawable/btn_tela_inicial"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingHorizontal="20dp"
+        android:textAllCaps="false"
+        android:layout_marginTop="15dp"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/listaSalas"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingBottom="30dp"
+        android:paddingTop="30dp"
+        android:paddingStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/salas"
+        tools:itemCount="3" />
+
+    <TextView
+        android:id="@+id/vazio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:gravity="center"
+        android:text="Você ainda não está em nenhuma sala. Entre com um código ou crie a sua."
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/listaSalas"
+        app:layout_constraintBottom_toBottomOf="@+id/listaSalas" />
+
+    <ProgressBar
+        android:id="@+id/carregando"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/listaSalas"
+        app:layout_constraintBottom_toBottomOf="@+id/listaSalas" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
