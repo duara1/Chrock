@@ -9,82 +9,184 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.chrock.data.DadosManager;
-import com.example.chrock.model.Conta;
+import com.example.chrock.data.Sessao;
+import com.example.chrock.model.Despesa;
+import com.example.chrock.model.Sala;
+import com.example.chrock.model.StatusContribuicao;
+import com.example.chrock.repositorio.RepositorioSupabase;
+import com.example.chrock.util.Acesso;
+import com.example.chrock.util.Formatar;
+import java.util.List;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 public class ResumoPessoalActivity extends AppCompatActivity {
 
     private LinearLayout conteudo;
-    private final String usuario = "Você";
+    private String salaId;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_resumo_pessoal);
+    private final RepositorioSupabase repo =
+            RepositorioSupabase.get();
 
-        DadosManager.inicializar(this);
 
-        findViewById(R.id.botaoVoltar)
-                .setOnClickListener(v -> finish());
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        conteudo = findViewById(R.id.conteudoResumoPessoal);
+    if (!Acesso.exigirLogin(this)) return;
 
-        carregarResumo();
+    setContentView(R.layout.activity_resumo_pessoal);
+
+    salaId = getIntent().getStringExtra("salaId");
+
+    if (salaId == null || salaId.trim().isEmpty()) {
+        finish();
+        return;
     }
+
+    findViewById(R.id.botaoVoltar)
+            .setOnClickListener(v -> finish());
+
+    conteudo = findViewById(R.id.conteudoResumoPessoal);
+}
+
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (conteudo != null) {
+        if (conteudo != null && Acesso.exigirLogin(this)) {
             carregarResumo();
         }
     }
 
-    private void carregarResumo() {
 
-        conteudo.removeAllViews();
+private void carregarResumo() {
 
-        ArrayList<Conta> contas =
-                DadosManager.getHistoricoPessoal(this, usuario);
+    conteudo.removeAllViews();
+    adicionarTexto("Carregando resumo pessoal...");
 
-        double totalContas =
-                DadosManager.getTotalPessoal(this, usuario);
+    repo.carregarSala(
+            salaId,
+            new RepositorioSupabase.Resposta<Sala>() {
 
-        double totalPago =
-                DadosManager.getTotalPagoPessoal(this, usuario);
+        @Override
+        public void sucesso(Sala sala) {
 
-        adicionarTitulo("Visão geral");
+            if (isFinishing() || isDestroyed()) return;
 
-        adicionarIndicador(
-                "Contas com participação",
-                String.valueOf(contas.size())
-        );
+            repo.carregarDespesas(
+                    salaId,
+                    new RepositorioSupabase.Resposta<List<Despesa>>() {
 
-        adicionarIndicador(
-                "Valor total das contas",
-                formatarValor(totalContas)
-        );
+                @Override
+                public void sucesso(List<Despesa> despesas) {
 
-        adicionarIndicador(
-                "Seus pagamentos confirmados",
-                formatarValor(totalPago)
-        );
+                    if (isFinishing() || isDestroyed()) return;
 
-        adicionarTitulo("Minhas contas");
+                    montarResumo(despesas);
+                }
 
-        if (contas.isEmpty()) {
-            adicionarTexto("Nenhuma conta encontrada.");
-            return;
+                @Override
+                public void erro(String mensagem) {
+                    mostrarErro(mensagem);
+                }
+            });
         }
 
-        for (Conta conta : contas) {
-            adicionarCard(conta);
+        @Override
+        public void erro(String mensagem) {
+            mostrarErro(mensagem);
+        }
+    });
+}
+
+private void mostrarErro(String mensagem) {
+
+    if (isFinishing() || isDestroyed()) return;
+
+    conteudo.removeAllViews();
+    adicionarTexto(mensagem);
+}
+
+private void montarResumo(List<Despesa> despesas) {
+
+    conteudo.removeAllViews();
+
+    String usuarioId = Sessao.getUsuarioId();
+
+    int total = 0;
+    int pago = 0;
+    int quantidade = 0;
+    int quantidadePagas = 0;
+
+    for (Despesa d : despesas) {
+
+        if (!d.isContribuente(usuarioId)) continue;
+
+        quantidade++;
+
+        int minhaParte =
+                d.getValorATransferirEmInt(usuarioId);
+
+        total += minhaParte;
+
+        if (d.isConcluida()
+                || d.getStatus(usuarioId)
+                == StatusContribuicao.CONFIRMADO) {
+
+            pago += minhaParte;
+            quantidadePagas++;
         }
     }
+
+    adicionarTitulo("Visão geral");
+
+    adicionarIndicador(
+            "Contas com participação",
+            String.valueOf(quantidade)
+    );
+
+    adicionarIndicador(
+            "Total das minhas contribuições",
+            Formatar.reais(total)
+    );
+
+    adicionarIndicador(
+            "Total pago",
+            Formatar.reais(pago)
+    );
+
+    adicionarIndicador(
+            "Total pendente",
+            Formatar.reais(total - pago)
+    );
+
+    adicionarIndicador(
+            "Contas pagas",
+            String.valueOf(quantidadePagas)
+    );
+
+    adicionarIndicador(
+            "Contas pendentes",
+            String.valueOf(quantidade - quantidadePagas)
+    );
+
+    adicionarTitulo("Minhas contas");
+
+    if (quantidade == 0) {
+        adicionarTexto("Nenhuma conta encontrada.");
+        return;
+    }
+
+    for (Despesa d : despesas) {
+
+        if (d.isContribuente(usuarioId)) {
+            adicionarCard(d);
+        }
+    }
+}
+
 
     private void adicionarTitulo(String titulo) {
 
@@ -117,38 +219,56 @@ public class ResumoPessoalActivity extends AppCompatActivity {
         conteudo.addView(card);
     }
 
-    private void adicionarCard(Conta conta) {
 
-        LinearLayout card = criarCard();
+private void adicionarCard(Despesa despesa) {
 
-        card.addView(criarTexto(
-                conta.getNome(), 18, "#222222", true
-        ));
+    String usuarioId = Sessao.getUsuarioId();
 
-        card.addView(criarTexto(
-                "Responsável: " + conta.getResponsavel(),
-                14, "#555555", false
-        ));
+    LinearLayout card = criarCard();
 
-        card.addView(criarTexto(
-                "Vencimento: " + conta.getVencimento(),
-                14, "#555555", false
-        ));
+    boolean pago = despesa.isConcluida()
+            || despesa.getStatus(usuarioId)
+            == StatusContribuicao.CONFIRMADO;
 
-        card.addView(criarTexto(
-                "Valor: " + formatarValor(conta.getValor()),
-                16, "#222222", true
-        ));
+    card.addView(criarTexto(
+            despesa.getTitulo(),
+            18, "#222222", true
+    ));
 
-        card.addView(criarTexto(
-                conta.isPaga() ? "Paga" : "Pendente",
-                14,
-                conta.isPaga() ? "#478B37" : "#C77B22",
-                true
-        ));
+    card.addView(criarTexto(
+            "Vencimento: " + despesa.getVencimento(),
+            14, "#555555", false
+    ));
 
-        conteudo.addView(card);
-    }
+    card.addView(criarTexto(
+            "Valor total: "
+                    + Formatar.reais(despesa.getTotalEmInt()),
+            14, "#555555", false
+    ));
+
+    card.addView(criarTexto(
+            "Minha parte: "
+                    + Formatar.reais(
+                        despesa.getValorATransferirEmInt(usuarioId)
+                    ),
+            16, "#222222", true
+    ));
+
+    card.addView(criarTexto(
+            "Status: " + despesa.getStatus(usuarioId).name(),
+            14, "#555555", false
+    ));
+
+    card.addView(criarTexto(
+            pago ? "Pago" : "Pendente",
+            14,
+            pago ? "#478B37" : "#C77B22",
+            true
+    ));
+
+    conteudo.addView(card);
+}
+
 
     private LinearLayout criarCard() {
 

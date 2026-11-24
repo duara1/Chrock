@@ -8,84 +8,165 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.chrock.data.DadosManager;
-import com.example.chrock.model.Conta;
-
-import java.util.ArrayList;
+import com.example.chrock.model.Despesa;
+import com.example.chrock.model.Sala;
+import com.example.chrock.repositorio.RepositorioSupabase;
+import com.example.chrock.util.Acesso;
+import com.example.chrock.util.Formatar;
+import java.util.List;
 import java.util.Locale;
 
 public class ResumoSalaActivity extends AppCompatActivity {
 
     private LinearLayout conteudo;
+    private String salaId;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_resumo_sala);
+    private final RepositorioSupabase repo =
+            RepositorioSupabase.get();
 
-        DadosManager.inicializar(this);
 
-        findViewById(R.id.botaoVoltar)
-                .setOnClickListener(v -> finish());
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        conteudo = findViewById(R.id.conteudoResumoSala);
+    if (!Acesso.exigirLogin(this)) return;
 
+    setContentView(R.layout.activity_resumo_sala);
+
+    salaId = getIntent().getStringExtra("salaId");
+
+    if (salaId == null || salaId.trim().isEmpty()) {
+        finish();
+        return;
+    }
+
+    findViewById(R.id.botaoVoltar)
+            .setOnClickListener(v -> finish());
+
+    conteudo = findViewById(R.id.conteudoResumoSala);
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+
+    if (conteudo != null && Acesso.exigirLogin(this)) {
         carregarResumo();
     }
+}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
 
-        if (conteudo != null) {
-            carregarResumo();
+
+private void carregarResumo() {
+
+    conteudo.removeAllViews();
+    adicionarTexto("Carregando resumo da sala...");
+
+    repo.carregarSala(
+            salaId,
+            new RepositorioSupabase.Resposta<Sala>() {
+
+        @Override
+        public void sucesso(Sala sala) {
+
+            if (isFinishing() || isDestroyed()) return;
+
+            repo.carregarDespesas(
+                    salaId,
+                    new RepositorioSupabase.Resposta<List<Despesa>>() {
+
+                @Override
+                public void sucesso(List<Despesa> despesas) {
+
+                    if (isFinishing() || isDestroyed()) return;
+
+                    montarResumo(despesas);
+                }
+
+                @Override
+                public void erro(String mensagem) {
+                    mostrarErro(mensagem);
+                }
+            });
+        }
+
+        @Override
+        public void erro(String mensagem) {
+            mostrarErro(mensagem);
+        }
+    });
+}
+
+private void mostrarErro(String mensagem) {
+
+    if (isFinishing() || isDestroyed()) return;
+
+    conteudo.removeAllViews();
+    adicionarTexto(mensagem);
+}
+
+private void montarResumo(List<Despesa> despesas) {
+
+    conteudo.removeAllViews();
+
+    int total = 0;
+    int pago = 0;
+    int contasPagas = 0;
+
+    for (Despesa d : despesas) {
+
+        total += d.getTotalEmInt();
+
+        if (d.isConcluida()) {
+            pago += d.getTotalEmInt();
+            contasPagas++;
         }
     }
 
-    private void carregarResumo() {
+    adicionarTitulo("Resumo financeiro da sala");
 
-        conteudo.removeAllViews();
+    adicionarIndicador(
+            "Total de despesas",
+            Formatar.reais(total)
+    );
 
-        adicionarTitulo("Resumo financeiro da sala");
+    adicionarIndicador(
+            "Total pago",
+            Formatar.reais(pago)
+    );
 
-        adicionarIndicador(
-                "Total de despesas",
-                DadosManager.getTotalSala(this)
-        );
+    adicionarIndicador(
+            "Total pendente",
+            Formatar.reais(total - pago)
+    );
 
-        adicionarIndicador(
-                "Total pago",
-                DadosManager.getTotalPago(this)
-        );
+    adicionarIndicador(
+            "Contas cadastradas",
+            despesas.size()
+    );
 
-        adicionarIndicador(
-                "Total pendente",
-                DadosManager.getTotalPendente(this)
-        );
+    adicionarIndicador(
+            "Contas pagas",
+            contasPagas
+    );
 
-        adicionarIndicador(
-                "Contas pagas",
-                DadosManager.getQuantidadeContasPagas(this)
-        );
+    adicionarIndicador(
+            "Contas pendentes",
+            despesas.size() - contasPagas
+    );
 
-        adicionarIndicador(
-                "Contas pendentes",
-                DadosManager.getQuantidadeContasPendentes(this)
-        );
+    adicionarTitulo("Contas da sala");
 
-        adicionarTitulo("Contas da sala");
-
-        ArrayList<Conta> contas = DadosManager.getContas(this);
-
-        if (contas.isEmpty()) {
-            adicionarTexto("Nenhuma conta cadastrada.");
-            return;
-        }
-
-        for (Conta conta : contas) {
-            adicionarCard(conta);
-        }
+    if (despesas.isEmpty()) {
+        adicionarTexto("Nenhuma conta cadastrada.");
+        return;
     }
+
+    for (Despesa d : despesas) {
+        adicionarCard(d);
+    }
+}
+
 
     private void adicionarTitulo(String titulo) {
 
@@ -134,38 +215,44 @@ public class ResumoSalaActivity extends AppCompatActivity {
         conteudo.addView(card);
     }
 
-    private void adicionarCard(Conta conta) {
 
-        LinearLayout card = criarCard();
+private void adicionarCard(Despesa despesa) {
 
-        card.addView(criarTexto(
-                conta.getNome(), 18, "#222222", true
-        ));
+    LinearLayout card = criarCard();
 
-        card.addView(criarTexto(
-                "Responsável: " + conta.getResponsavel(),
-                14, "#555555", false
-        ));
+    card.addView(criarTexto(
+            despesa.getTitulo(),
+            18, "#222222", true
+    ));
 
-        card.addView(criarTexto(
-                "Vencimento: " + conta.getVencimento(),
-                14, "#555555", false
-        ));
+    card.addView(criarTexto(
+            "Vencimento: " + despesa.getVencimento(),
+            14, "#555555", false
+    ));
 
-        card.addView(criarTexto(
-                formatarValor(conta.getValor()),
-                16, "#222222", true
-        ));
+    card.addView(criarTexto(
+            "Participantes: "
+                    + despesa.getContribuintes().size(),
+            14, "#555555", false
+    ));
 
-        card.addView(criarTexto(
-                conta.isPaga() ? "Paga" : "Pendente",
-                14,
-                conta.isPaga() ? "#478B37" : "#C77B22",
-                true
-        ));
+    card.addView(criarTexto(
+            Formatar.reais(despesa.getTotalEmInt()),
+            16, "#222222", true
+    ));
 
-        conteudo.addView(card);
-    }
+    card.addView(criarTexto(
+            despesa.isConcluida() ? "Paga" : "Pendente",
+            14,
+            despesa.isConcluida()
+                    ? "#478B37"
+                    : "#C77B22",
+            true
+    ));
+
+    conteudo.addView(card);
+}
+
 
     private LinearLayout criarCard() {
 
