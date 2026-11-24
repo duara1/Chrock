@@ -508,6 +508,23 @@
             android:stateListAnimator="@drawable/anima"
             android:textColor="@color/black"
             android:textSize="13sp"/>
+
+        <TextView
+                android:id="@+id/abaNotificacoes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp"
+                app:drawableTopCompat="@drawable/ic_notificacoes"
+                app:drawableTint="@color/black"
+                android:text="Notificações"
+                android:gravity="center"
+                android:stateListAnimator="@drawable/anima"
+                android:textColor="@color/black"
+                android:textSize="13sp" />
+
     </LinearLayout>
 
     <ProgressBar
