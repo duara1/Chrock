@@ -326,29 +326,9 @@ public class SalaInicio extends AppCompatActivity {
             return;
         }
 
-findViewById(R.id.cardPessoal).setOnClickListener(v -> {
 
-    Intent intent = new Intent(
-            this,
-            ResumoPessoalActivity.class
-    );
 
-    intent.putExtra("salaId", salaId);
 
-    startActivity(intent);
-});
-
-findViewById(R.id.cardSala).setOnClickListener(v -> {
-
-    Intent intent = new Intent(
-            this,
-            ResumoSalaActivity.class
-    );
-
-    intent.putExtra("salaId", salaId);
-
-    startActivity(intent);
-});
 
 
         carregarHome();
