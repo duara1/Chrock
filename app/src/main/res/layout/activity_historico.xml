@@ -5,14 +5,14 @@
               android:orientation="vertical"
               android:background="#FFFFFF">
 
-<TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="HistÃƒÂ³rico"
-            android:textStyle="bold"
-            android:textSize="26sp"
-            android:padding="20dp"
-            android:textColor="#252525" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:text="Histórico"
+        android:textColor="#252525"
+        android:textSize="26sp"
+        android:textStyle="bold" />
 
     <!-- Seletor existente da master -->
     <Spinner
@@ -21,13 +21,13 @@
             android:layout_height="wrap_content"
             android:padding="12dp" />
 
-    <!-- Filtro por perÃƒÂ­odo -->
+    <!-- Filtro por período -->
     <Spinner
             android:id="@+id/filtroPeriodo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            android:contentDescription="Filtrar histÃƒÂ³rico por perÃƒÂ­odo" />
+            android:contentDescription="Filtrar histórico por período" />
 
     <!-- Filtro por status -->
     <Spinner
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            android:contentDescription="Filtrar histÃƒÂ³rico por status" />
+            android:contentDescription="Filtrar histórico por status" />
 
     <ScrollView
             android:layout_width="match_parent"
