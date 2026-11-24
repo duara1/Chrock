@@ -420,4 +420,105 @@ public class RepositorioSupabase {
             }
         });
     }
+
+
+    // ==========================================
+    // MODULO DE NOTIFICACOES
+    // ==========================================
+
+    public void carregarNotificacoes(
+            String salaId,
+            Resposta<JSONArray> resposta) {
+
+        Api.get(
+                "/rest/v1/notificacoes"
+                        + "?select=id,titulo,mensagem,tipo,lida,criada_em"
+                        + "&sala_id=eq." + salaId
+                        + "&order=criada_em.desc,id.desc",
+                new Api.Resultado() {
+
+                    @Override
+                    public void sucesso(String corpo) {
+                        try {
+                            JSONArray lista = new JSONArray(corpo);
+                            entregar(resposta, lista);
+                        } catch (JSONException e) {
+                            falhar(resposta,
+                                    "Erro ao interpretar notificações.");
+                        }
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+                        falhar(resposta, mensagem);
+                    }
+                }
+        );
+    }
+
+    public void gerarLembretesVencimento(
+            String salaId,
+            Resposta<Void> resposta) {
+
+        executarRpcNotificacao(
+                "gerar_lembretes_vencimento",
+                "p_sala",
+                salaId,
+                resposta
+        );
+    }
+
+    public void marcarNotificacaoLida(
+            String notificacaoId,
+            Resposta<Void> resposta) {
+
+        executarRpcNotificacao(
+                "marcar_notificacao_lida",
+                "p_notificacao",
+                notificacaoId,
+                resposta
+        );
+    }
+
+    public void marcarTodasNotificacoesLidas(
+            String salaId,
+            Resposta<Void> resposta) {
+
+        executarRpcNotificacao(
+                "marcar_todas_notificacoes_lidas",
+                "p_sala",
+                salaId,
+                resposta
+        );
+    }
+
+    private void executarRpcNotificacao(
+            String funcao,
+            String parametro,
+            String valor,
+            Resposta<Void> resposta) {
+
+        JSONObject args = new JSONObject();
+
+        try {
+            args.put(parametro, valor);
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc(funcao, args, new Api.Resultado() {
+
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, null);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
 }
