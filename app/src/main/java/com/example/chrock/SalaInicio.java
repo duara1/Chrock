@@ -141,6 +141,7 @@ public class SalaInicio extends AppCompatActivity {
                 salaAtual = sala;
                 atualizarBotoesDoPapel(sala);
                 carregarDadosDaSala(sala);
+                atualizarContadorNotificacoes();
             }
 
             @Override
@@ -295,6 +296,17 @@ public class SalaInicio extends AppCompatActivity {
             startActivity(i);
         });
 
+        
+        // Navegacao dos modulos integrados
+        findViewById(R.id.cardPessoal).setOnClickListener(v ->
+                abrirModulo(ResumoPessoalActivity.class));
+
+        findViewById(R.id.cardSala).setOnClickListener(v ->
+                abrirModulo(ResumoSalaActivity.class));
+
+        findViewById(R.id.abaNotificacoes).setOnClickListener(v ->
+                abrirModulo(NotificacoesActivity.class));
+
         findViewById(R.id.abaHistorico).setOnClickListener(v -> {
             Intent i = new Intent(this, historico.class);
             i.putExtra("salaId", salaId);
@@ -341,4 +353,93 @@ findViewById(R.id.cardSala).setOnClickListener(v -> {
 
         carregarHome();
     }
+
+
+    private void abrirModulo(Class<?> activity) {
+
+        if (salaId == null || salaAtual == null) {
+            Toast.makeText(
+                    this,
+                    "Aguarde o carregamento da sala.",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        if (!Acesso.exigirLogin(this)) return;
+
+        Intent intent = new Intent(this, activity);
+        intent.putExtra("salaId", salaId);
+        startActivity(intent);
+    }
+
+    private void atualizarContadorNotificacoes() {
+
+        if (salaId == null || isFinishing() || isDestroyed()) {
+            return;
+        }
+
+        TextView aba = findViewById(R.id.abaNotificacoes);
+
+        if (aba == null) return;
+
+        RepositorioSupabase.get().carregarNotificacoes(
+                salaId,
+                new RepositorioSupabase.Resposta<org.json.JSONArray>() {
+
+                    @Override
+                    public void sucesso(org.json.JSONArray dados) {
+
+                        if (isFinishing() || isDestroyed()) return;
+
+                        int quantidade = 0;
+
+                        for (int i = 0; i < dados.length(); i++) {
+
+                            org.json.JSONObject item =
+                                    dados.optJSONObject(i);
+
+                            if (item != null
+                                    && !item.optBoolean("lida", false)) {
+                                quantidade++;
+                            }
+                        }
+
+                        if (quantidade > 0) {
+
+                            String total = quantidade > 99
+                                    ? "99+"
+                                    : String.valueOf(quantidade);
+
+                            aba.setText("Notificações (" + total + ")");
+
+                            aba.setTextColor(
+                                    android.graphics.Color.rgb(99, 77, 244)
+                            );
+
+                        } else {
+
+                            aba.setText("Notificações");
+
+                            aba.setTextColor(
+                                    android.graphics.Color.BLACK
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+
+                        if (isFinishing() || isDestroyed()) return;
+
+                        aba.setText("Notificações");
+
+                        aba.setTextColor(
+                                android.graphics.Color.BLACK
+                        );
+                    }
+                }
+        );
+    }
+
 }
