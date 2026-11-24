@@ -314,30 +314,16 @@ public class NotificacoesActivity extends AppCompatActivity {
     }
 
     private String formatarData(String data) {
-
         try {
-            java.text.SimpleDateFormat entrada =
-                    new java.text.SimpleDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss",
-                            java.util.Locale.US
+            return java.time.OffsetDateTime
+                    .parse(data)
+                    .atZoneSameInstant(
+                            java.time.ZoneId.systemDefault()
+                    )
+                    .format(
+                            java.time.format.DateTimeFormatter
+                                    .ofPattern("dd/MM/yyyy HH:mm")
                     );
-
-            entrada.setTimeZone(
-                    java.util.TimeZone.getTimeZone("UTC")
-            );
-
-            java.util.Date instante = entrada.parse(data);
-
-            java.text.SimpleDateFormat saida =
-                    new java.text.SimpleDateFormat(
-                            "dd/MM/yyyy HH:mm",
-                            new java.util.Locale("pt", "BR")
-                    );
-
-            return instante == null
-                    ? data
-                    : saida.format(instante);
-
         } catch (Exception e) {
             return data;
         }
