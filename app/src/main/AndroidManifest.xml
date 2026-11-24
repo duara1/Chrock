@@ -60,6 +60,44 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Modulos de historico, resumos e notificacoes -->
+
+        <activity
+                android:name=".HistoricoActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
+        <activity
+                android:name=".HistoricoContaActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
+        <activity
+                android:name=".HistoricoSalaActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
+        <activity
+                android:name=".ModulosYasminActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
+        <activity
+                android:name=".NotificacoesActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
+        <activity
+                android:name=".ResumoPessoalActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
+        <activity
+                android:name=".ResumoSalaActivity"
+                android:exported="false"
+                android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>
