@@ -1,19 +1,29 @@
 package com.example.chrock;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.chrock.data.AuthApi;
+import com.example.chrock.data.Sessao;
+import com.example.chrock.repositorio.RepositorioSupabase;
+import com.example.chrock.util.Imagem;
+
+import java.io.IOException;
 
 public class Cadastrar extends AppCompatActivity {
 
@@ -24,6 +34,17 @@ public class Cadastrar extends AppCompatActivity {
     private EditText campoSenha;
     private EditText campoChave;
     private Button botaoCadastrar;
+    private ImageView fotoPerfil;
+
+    private Uri fotoEscolhida;
+
+    private final ActivityResultLauncher<String> escolherFoto =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                fotoEscolhida = uri;
+                Glide.with(this).load(uri).circleCrop().into(fotoPerfil);
+                fotoPerfil.setContentDescription("Foto de perfil escolhida. Toque para trocar");
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +57,16 @@ public class Cadastrar extends AppCompatActivity {
             return insets;
         });
 
+        Sessao.carregar(this);
+
         campoNome = findViewById(R.id.cadastroNome);
         campoEmail = findViewById(R.id.cadastroEmail);
         campoSenha = findViewById(R.id.cadastroSenha);
         campoChave = findViewById(R.id.cadastroChave);
         botaoCadastrar = findViewById(R.id.botaoCadastrar);
+        fotoPerfil = findViewById(R.id.fotoPerfil);
 
+        fotoPerfil.setOnClickListener(v -> escolherFoto.launch("image/*"));
         botaoCadastrar.setOnClickListener(v -> cadastrar());
     }
 
@@ -70,15 +95,18 @@ public class Cadastrar extends AppCompatActivity {
 
         botaoCadastrar.setEnabled(false);
         botaoCadastrar.setText("Cadastrando...");
+        fotoPerfil.setEnabled(false);
 
         AuthApi.cadastrar(nome, chavePix, email, senha, new AuthApi.Retorno() {
             @Override
             public void sucesso() {
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) return;
-                    Intent intent = new Intent(Cadastrar.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    if (fotoEscolhida == null) {
+                        abrirSalas();
+                    } else {
+                        enviarFoto();
+                    }
                 });
             }
 
@@ -97,9 +125,51 @@ public class Cadastrar extends AppCompatActivity {
 
                     botaoCadastrar.setEnabled(true);
                     botaoCadastrar.setText("Cadastrar");
+                    fotoPerfil.setEnabled(true);
                     Toast.makeText(Cadastrar.this, mensagem, Toast.LENGTH_LONG).show();
                 });
             }
         });
+    }
+
+    private void enviarFoto() {
+        botaoCadastrar.setText("Enviando foto...");
+
+        new Thread(() -> {
+            try {
+                byte[] foto = Imagem.prepararJpeg(getContentResolver(), fotoEscolhida);
+                runOnUiThread(() -> salvarFoto(foto));
+            } catch (IOException | RuntimeException e) {
+                runOnUiThread(() -> fotoNaoSalva());
+            }
+        }).start();
+    }
+
+    private void salvarFoto(byte[] foto) {
+        RepositorioSupabase.get().salvarFotoPerfil(foto, new RepositorioSupabase.Resposta<String>() {
+            @Override
+            public void sucesso(String endereco) {
+                if (isFinishing() || isDestroyed()) return;
+                abrirSalas();
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                fotoNaoSalva();
+            }
+        });
+    }
+
+    private void fotoNaoSalva() {
+        if (isFinishing() || isDestroyed()) return;
+        Toast.makeText(this, "Sua conta foi criada, mas não deu pra salvar a foto.",
+                Toast.LENGTH_LONG).show();
+        abrirSalas();
+    }
+
+    private void abrirSalas() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

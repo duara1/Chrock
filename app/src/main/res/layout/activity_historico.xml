@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:background="#FFFFFF">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/historico"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".historico">
 
     <TextView
         android:layout_width="match_parent"
@@ -12,54 +16,73 @@
         android:text="Histórico"
         android:textColor="#252525"
         android:textSize="26sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:accessibilityHeading="true" />
 
-    <!-- Seletor existente da master -->
     <Spinner
-            android:id="@+id/modoHistorico"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp" />
-
-    <!-- Filtro por período -->
-    <Spinner
-            android:id="@+id/filtroPeriodo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:contentDescription="Filtrar histórico por período" />
-
-    <!-- Filtro por status -->
-    <Spinner
-            android:id="@+id/filtroStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:contentDescription="Filtrar histórico por status" />
+        android:id="@+id/modoHistorico"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:contentDescription="Escolher entre meu histórico e o histórico da sala" />
 
     <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
-                android:id="@+id/conteudoHistorico"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:orientation="vertical" />
+            android:id="@+id/conteudoHistorico"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:orientation="vertical" />
 
     </ScrollView>
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/fundoClaro"
+        android:paddingTop="10dp"
+        android:paddingBottom="9dp">
+
+        <TextView
             android:id="@+id/abaInicio"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:gravity="center"
-            android:text="Voltar para sala"
-            android:background="#F0EDF8"
-            android:textColor="#423270"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:clickable="true"
-            android:focusable="true" />
+            android:focusable="true"
+            android:minHeight="48dp"
+            app:drawableTopCompat="@drawable/inicio"
+            app:drawableTint="@color/black"
+            android:text="Início"
+            android:gravity="center"
+            android:stateListAnimator="@drawable/anima"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/abaHistorico"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="48dp"
+            app:drawableTopCompat="@drawable/historico"
+            app:drawableTint="@color/roxoEscrita"
+            android:text="Histórico"
+            android:contentDescription="Histórico, tela atual"
+            android:gravity="center"
+            android:stateListAnimator="@drawable/anima"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+
+
+    </LinearLayout>
 
 </LinearLayout>

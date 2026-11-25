@@ -1,62 +1,71 @@
-
 package com.example.chrock;
 
-import android.os.Bundle;
-import android.view.View;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
+import android.os.Bundle;
+import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.chrock.data.Sessao;
-import com.example.chrock.model.Contribuicao;
 import com.example.chrock.model.Despesa;
-import com.example.chrock.model.Sala;
+import com.example.chrock.model.StatusContribuicao;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.repositorio.RepositorioSupabase;
 import com.example.chrock.util.Acesso;
 import com.example.chrock.util.Formatar;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class historico extends AppCompatActivity {
+
+    private static final int MEU_HISTORICO = 0;
+    private static final int HISTORICO_DA_SALA = 1;
+
+    private final RepositorioSupabase repo = RepositorioSupabase.get();
 
     private String salaId;
     private LinearLayout conteudo;
 
     private Spinner modo;
-    private Spinner filtroPeriodo;
-    private Spinner filtroStatus;
 
     private List<Despesa> despesas;
     private Map<String, Usuario> usuarios;
-
     private boolean carregando = false;
-
-    private final RepositorioSupabase repo =
-            RepositorioSupabase.get();
 
     @Override
     protected void onCreate(Bundle state) {
-
         super.onCreate(state);
 
         if (!Acesso.exigirLogin(this)) return;
 
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_historico);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.historico), (v, insets) -> {
+            Insets barras = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+            return insets;
+        });
 
         salaId = getIntent().getStringExtra("salaId");
-
         if (salaId == null || salaId.trim().isEmpty()) {
             finish();
             return;
@@ -64,133 +73,59 @@ public class historico extends AppCompatActivity {
 
         conteudo = findViewById(R.id.conteudoHistorico);
         modo = findViewById(R.id.modoHistorico);
-        filtroPeriodo = findViewById(R.id.filtroPeriodo);
-        filtroStatus = findViewById(R.id.filtroStatus);
 
         configurarFiltros();
-
-        findViewById(R.id.abaInicio)
-                .setOnClickListener(v -> finish());
+        configurarMenu();
     }
 
     @Override
     protected void onResume() {
-
         super.onResume();
+        if (conteudo != null && Acesso.exigirLogin(this)) carregar();
+    }
 
-        if (conteudo != null && Acesso.exigirLogin(this)) {
-            carregar();
-        }
+    private void configurarMenu() {
+        findViewById(R.id.abaInicio).setOnClickListener(v -> finish());
     }
 
     private void configurarFiltros() {
-
-        modo.setAdapter(new ArrayAdapter<>(
-                this,
+        modo.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item,
-                new String[]{
-                        "Meu histórico",
-                        "Histórico da sala",
-                        "Histórico por conta"
-                }
-        ));
+                new String[]{"Meu histórico", "Histórico da sala"}));
 
-        filtroPeriodo.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Todos os meses"}
-        ));
-
-        filtroStatus.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{
-                        "Todos os status",
-                        "Pendente",
-                        "Sinalizado",
-                        "Confirmado",
-                        "Contestado"
-                }
-        ));
-
-        AdapterView.OnItemSelectedListener listener =
-                new AdapterView.OnItemSelectedListener() {
-
+        modo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(
-                    AdapterView<?> parent,
-                    View view,
-                    int position,
-                    long id) {
-
+            public void onItemSelected(AdapterView<?> pai, View view, int posicao, long id) {
                 mostrar();
             }
 
             @Override
-            public void onNothingSelected(
-                    AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> pai) {
             }
-        };
-
-        modo.setOnItemSelectedListener(listener);
-        filtroPeriodo.setOnItemSelectedListener(listener);
-        filtroStatus.setOnItemSelectedListener(listener);
+        });
     }
 
     private void carregar() {
-
         if (carregando) return;
-
         carregando = true;
-        despesas = null;
-        usuarios = null;
-
         mensagem("Carregando histórico...");
 
-        repo.carregarSala(
-                salaId,
-                new RepositorioSupabase.Resposta<Sala>() {
-
+        repo.carregarDespesas(salaId, new RepositorioSupabase.Resposta<List<Despesa>>() {
             @Override
-            public void sucesso(Sala sala) {
-
+            public void sucesso(List<Despesa> dados) {
                 if (isFinishing() || isDestroyed()) return;
 
-                repo.carregarDespesas(
-                        salaId,
-                        new RepositorioSupabase.Resposta<List<Despesa>>() {
-
+                repo.carregarMembros(salaId, new RepositorioSupabase.Resposta<Map<String, Usuario>>() {
                     @Override
-                    public void sucesso(List<Despesa> dados) {
-
+                    public void sucesso(Map<String, Usuario> membros) {
                         if (isFinishing() || isDestroyed()) return;
 
-                        despesas = dados;
+                        despesas = new ArrayList<>(dados);
+                        Collections.reverse(despesas);
+                        usuarios = membros;
+                        carregando = false;
 
-                        repo.carregarMembros(
-                                salaId,
-                                new RepositorioSupabase.Resposta<Map<String, Usuario>>() {
-
-                            @Override
-                            public void sucesso(
-                                    Map<String, Usuario> membros) {
-
-                                if (isFinishing() || isDestroyed()) return;
-
-                                usuarios = membros;
-
-                                atualizarPeriodos();
-
-                                carregando = false;
-
-                                mostrar();
-                            }
-
-                            @Override
-                            public void erro(String erro) {
-                                falha(erro);
-                            }
-                        });
+                        mostrar();
                     }
 
                     @Override
@@ -208,385 +143,169 @@ public class historico extends AppCompatActivity {
     }
 
     private void falha(String erro) {
-
         carregando = false;
-        despesas = null;
-        usuarios = null;
-
         mensagem(erro);
     }
 
-    private String obterPeriodo(String data) {
+    private boolean entraNoMeuHistorico(Despesa d, String eu) {
+        if (!d.isContribuente(eu)) return false;
+        if (d.getResponsavelId().equals(eu)) return false;
 
-        if (data == null) return "";
-
-        // Formato utilizado pelo Supabase.
-        if (data.matches("\\d{4}-\\d{2}-\\d{2}")) {
-
-            return data.substring(5, 7)
-                    + "/"
-                    + data.substring(0, 4);
-        }
-
-        // Formato brasileiro.
-        if (data.matches("\\d{2}/\\d{2}/\\d{4}")) {
-
-            return data.substring(3);
-        }
-
-        return "";
+        StatusContribuicao status = d.getStatus(eu);
+        return status == StatusContribuicao.SINALIZADO
+                || status == StatusContribuicao.CONFIRMADO;
     }
 
-    private void atualizarPeriodos() {
-
-        Object anterior = filtroPeriodo.getSelectedItem();
-
-        Set<String> meses = new LinkedHashSet<>();
-
-        meses.add("Todos os meses");
-
-        for (Despesa d : despesas) {
-
-            String periodo = obterPeriodo(d.getVencimento());
-
-            if (!periodo.isEmpty()) {
-                meses.add(periodo);
-            }
-        }
-
-        List<String> opcoes = new ArrayList<>(meses);
-
-        filtroPeriodo.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                opcoes
-        ));
-
-        int posicao = opcoes.indexOf(anterior);
-
-        filtroPeriodo.setSelection(
-                posicao >= 0 ? posicao : 0
-        );
-    }
-
-    private boolean correspondePeriodo(Despesa d) {
-
-        Object selecionado = filtroPeriodo.getSelectedItem();
-
-        if (selecionado == null
-                || filtroPeriodo.getSelectedItemPosition() == 0) {
-
-            return true;
-        }
-
-        return selecionado.toString()
-                .equals(obterPeriodo(d.getVencimento()));
-    }
-
-    private boolean correspondeStatus(
-            Despesa d,
-            String usuarioId,
-            int modoAtual) {
-
-        int posicao = filtroStatus.getSelectedItemPosition();
-
-        if (posicao <= 0) return true;
-
-        String[] status = {
-                "",
-                "PENDENTE",
-                "SINALIZADO",
-                "CONFIRMADO",
-                "CONTESTADO"
-        };
-
-        String selecionado = status[posicao];
-
-        if (modoAtual == 0) {
-
-            return d.isContribuente(usuarioId)
-                    && d.getStatus(usuarioId)
-                    .name().equals(selecionado);
-        }
-
-        for (Contribuicao c : d.getContribuintes()) {
-
-            if (c.getStatus().name().equals(selecionado)) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean entraNoHistoricoDaSala(Despesa d) {
+        return d.isConcluida();
     }
 
     private void mostrar() {
-
-        if (conteudo == null
-                || despesas == null
-                || usuarios == null
-                || carregando
-                || isFinishing()
-                || isDestroyed()) {
-
+        if (conteudo == null || despesas == null || usuarios == null || carregando
+                || isFinishing() || isDestroyed()) {
             return;
         }
 
         conteudo.removeAllViews();
-
         String eu = Sessao.getUsuarioId();
-
         int modoAtual = modo.getSelectedItemPosition();
-
         int quantidade = 0;
 
         for (Despesa d : despesas) {
-
-            if (modoAtual == 0 && !d.isContribuente(eu)) {
-                continue;
+            if (modoAtual == MEU_HISTORICO) {
+                if (!entraNoMeuHistorico(d, eu)) continue;
+                adicionarCardPessoal(d, eu);
+            } else {
+                if (!entraNoHistoricoDaSala(d)) continue;
+                adicionarCardDaSala(d);
             }
-
-            if (!correspondePeriodo(d)) continue;
-
-            if (!correspondeStatus(d, eu, modoAtual)) {
-                continue;
-            }
-
-            adicionarCard(d, eu, modoAtual);
-
             quantidade++;
         }
 
         if (quantidade == 0) {
-            mensagem("Nenhuma despesa encontrada para os filtros selecionados.");
+            mensagem(modoAtual == MEU_HISTORICO
+                    ? "Você ainda não tem transferências aqui."
+                    : "Nenhuma conta paga ainda.");
         }
     }
 
-    private void adicionarCard(
-            Despesa d,
-            String eu,
-            int modoAtual) {
+    private void adicionarCardPessoal(Despesa d, String eu) {
+        LinearLayout card = novoCard();
 
-        LinearLayout card = new LinearLayout(this);
+        card.addView(criarTexto(d.getTitulo(), 18, true));
+        card.addView(criarTexto("Minha parte: R$ " + Formatar.reais(d.getValorATransferirEmInt(eu)), 16, true));
+        card.addView(criarTexto("Para: " + nomeUsuario(d.getResponsavelId()), 14, false));
+        card.addView(criarTexto("Vencimento: " + d.getVencimento(), 14, false));
 
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundColor(Color.WHITE);
+        boolean confirmado = d.getStatus(eu) == StatusContribuicao.CONFIRMADO;
+        TextView status = criarTexto(confirmado ? "Confirmado" : "Aguardando confirmação", 14, true);
+        status.setTextColor(Color.parseColor(confirmado ? "#478B37" : "#C77B22"));
+        card.addView(status);
 
-        card.setPadding(
-                dp(16), dp(16),
-                dp(16), dp(16)
-        );
-
-        card.setElevation(dp(3));
-
-        LinearLayout.LayoutParams params =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        params.setMargins(
-                dp(4), dp(6),
-                dp(4), dp(12)
-        );
-
-        card.setLayoutParams(params);
-
-        card.addView(criarTexto(
-                d.getTitulo(), 20, true
-        ));
-
-        card.addView(criarTexto(
-                "Valor total: "
-                        + Formatar.reais(d.getTotalEmInt()),
-                16, true
-        ));
-
-        card.addView(criarTexto(
-                "Vencimento: " + d.getVencimento(),
-                14, false
-        ));
-
-        card.addView(criarTexto(
-                "Responsável: "
-                        + nomeUsuario(d.getResponsavelId()),
-                14, false
-        ));
-
-        TextView situacao = criarTexto(
-                d.isConcluida()
-                        ? "Conta paga"
-                        : "Conta em aberto",
-                14, true
-        );
-
-        situacao.setTextColor(Color.parseColor(
-                d.isConcluida()
-                        ? "#478B37"
-                        : "#C77B22"
-        ));
-
-        card.addView(situacao);
-
-        if (modoAtual == 0) {
-
-            card.addView(criarTexto(
-                    "Minha parte: "
-                            + Formatar.reais(
-                                d.getValorATransferirEmInt(eu)
-                            ),
-                    16, true
-            ));
-
-            card.addView(criarTexto(
-                    "Minha contribuição: "
-                            + d.getStatus(eu).name(),
-                    14, false
-            ));
-
-        } else if (modoAtual == 1) {
-
-            card.addView(criarTexto(
-                    "Participantes",
-                    16, true
-            ));
-
-            for (Contribuicao c : d.getContribuintes()) {
-
-                card.addView(criarTexto(
-                        nomeUsuario(c.getUsuarioId())
-                                + ": "
-                                + c.getStatus().name(),
-                        14, false
-                ));
-            }
-        }
-
-        TextView detalhes = criarTexto(
-                "Consultar detalhes da conta",
-                14, true
-        );
-
-        detalhes.setTextColor(
-                Color.parseColor("#7467CA")
-        );
-
-        card.addView(detalhes);
-
-        card.setClickable(true);
-        card.setFocusable(true);
-
-        card.setOnClickListener(v -> abrirDetalhes(d));
+        card.setContentDescription(d.getTitulo() + ", " + (confirmado ? "confirmado" : "aguardando confirmação"));
+        card.setOnClickListener(v -> {
+            Intent i = new Intent(this, despesa_informacoes.class);
+            i.putExtra("id", d.getDespesaId());
+            startActivity(i);
+        });
 
         conteudo.addView(card);
     }
 
-    private void abrirDetalhes(Despesa d) {
+    private void adicionarCardDaSala(Despesa d) {
+        LinearLayout card = novoCard();
 
-        StringBuilder texto = new StringBuilder();
+        card.addView(criarTexto(d.getTitulo(), 18, true));
+        card.addView(criarTexto("Total: R$ " + Formatar.reais(d.getTotalEmInt()), 16, true));
+        card.addView(criarTexto("Paga por: " + nomeUsuario(d.getResponsavelId()), 14, false));
+        card.addView(criarTexto("Vencimento: " + d.getVencimento(), 14, false));
 
-        texto.append("Valor total: ")
-                .append(Formatar.reais(d.getTotalEmInt()))
-                .append("\n\n");
+        TextView verComprovante = criarTexto("Ver comprovante", 14, true);
+        verComprovante.setTextColor(getColor(R.color.roxoBtn));
+        card.addView(verComprovante);
 
-        texto.append("Vencimento: ")
-                .append(d.getVencimento())
-                .append("\n\n");
+        card.setContentDescription(d.getTitulo() + ", paga. Toque para ver o comprovante");
+        card.setOnClickListener(v -> mostrarComprovante(d));
 
-        texto.append("Responsável: ")
-                .append(nomeUsuario(d.getResponsavelId()))
-                .append("\n\n");
+        conteudo.addView(card);
+    }
 
-        texto.append("Situação: ")
-                .append(d.isConcluida()
-                        ? "Paga"
-                        : "Em aberto")
-                .append("\n\n");
+    private void mostrarComprovante(Despesa d) {
+        if (d.getComprovante() == null) return;
 
-        texto.append("PARTICIPANTES\n\n");
+        Toast.makeText(this, "Abrindo comprovante...", Toast.LENGTH_SHORT).show();
 
-        for (Contribuicao c : d.getContribuintes()) {
+        repo.baixarComprovante(d.getComprovante().toString(), new RepositorioSupabase.Resposta<byte[]>() {
+            @Override
+            public void sucesso(byte[] dados) {
+                if (isFinishing() || isDestroyed()) return;
 
-            texto.append(nomeUsuario(c.getUsuarioId()))
-                    .append("\n");
+                Bitmap foto = BitmapFactory.decodeByteArray(dados, 0, dados.length);
+                if (foto == null) {
+                    Toast.makeText(historico.this, "Não foi possível abrir o comprovante.",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-            texto.append("Valor: ")
-                    .append(Formatar.reais(
-                            d.getValorATransferirEmInt(
-                                    c.getUsuarioId()
-                            )
-                    ))
-                    .append("\n");
+                ImageView imagem = new ImageView(historico.this);
+                imagem.setImageBitmap(foto);
+                imagem.setAdjustViewBounds(true);
+                imagem.setPadding(dp(8), dp(8), dp(8), dp(8));
+                imagem.setContentDescription("Comprovante de " + d.getTitulo());
 
-            texto.append("Status: ")
-                    .append(c.getStatus().name())
-                    .append("\n\n");
-        }
+                new AlertDialog.Builder(historico.this)
+                        .setTitle(d.getTitulo())
+                        .setView(imagem)
+                        .setPositiveButton("Fechar", null)
+                        .show();
+            }
 
-        new AlertDialog.Builder(this)
-                .setTitle(d.getTitulo())
-                .setMessage(texto.toString())
-                .setPositiveButton("Fechar", null)
-                .show();
+            @Override
+            public void erro(String mensagem) {
+                if (isFinishing() || isDestroyed()) return;
+                Toast.makeText(historico.this, mensagem, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private LinearLayout novoCard() {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundColor(Color.WHITE);
+        card.setPadding(dp(16), dp(14), dp(16), dp(14));
+        card.setElevation(dp(3));
+        card.setClickable(true);
+        card.setFocusable(true);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(dp(4), dp(6), dp(4), dp(10));
+        card.setLayoutParams(params);
+        return card;
     }
 
     private String nomeUsuario(String id) {
-
         Usuario usuario = usuarios.get(id);
-
-        return usuario == null
-                ? "Não identificado"
-                : usuario.getNome();
+        return usuario == null ? "Alguém" : usuario.getNome();
     }
 
-    private TextView criarTexto(
-            String mensagem,
-            int tamanho,
-            boolean negrito) {
-
-        TextView texto = new TextView(this);
-
-        texto.setText(mensagem);
-        texto.setTextSize(tamanho);
-
-        texto.setTextColor(
-                Color.parseColor("#252525")
-        );
-
-        texto.setPadding(
-                0, dp(5), 0, dp(5)
-        );
-
-        if (negrito) {
-
-            texto.setTypeface(
-                    null, Typeface.BOLD
-            );
-        }
-
-        return texto;
+    private TextView criarTexto(String texto, int tamanho, boolean negrito) {
+        TextView t = new TextView(this);
+        t.setText(texto);
+        t.setTextSize(tamanho);
+        t.setTextColor(Color.parseColor("#252525"));
+        t.setPadding(0, dp(3), 0, dp(3));
+        if (negrito) t.setTypeface(null, Typeface.BOLD);
+        return t;
     }
 
     private void mensagem(String msg) {
-
-        if (conteudo == null
-                || isFinishing()
-                || isDestroyed()) {
-
-            return;
-        }
-
+        if (conteudo == null || isFinishing() || isDestroyed()) return;
         conteudo.removeAllViews();
-
-        conteudo.addView(
-                criarTexto(msg, 16, false)
-        );
+        conteudo.addView(criarTexto(msg, 16, false));
     }
 
     private int dp(int valor) {
-
-        return Math.round(
-                valor * getResources()
-                        .getDisplayMetrics().density
-        );
+        return Math.round(valor * getResources().getDisplayMetrics().density);
     }
 }

@@ -24,6 +24,7 @@ public class AuthApi {
     }
 
     public static final String MSG_CONFIRMAR_EMAIL = "Cadastro feito. Confirme o e-mail antes de entrar.";
+    public static final String MSG_SEM_CONEXAO = "Sem conexão. Verifique a internet.";
 
     private static final OkHttpClient CLIENT = new OkHttpClient();
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -56,6 +57,22 @@ public class AuthApi {
         chamar("/auth/v1/signup", corpo, retorno);
     }
 
+    public static void renovar(Retorno retorno) {
+        String refresh = Sessao.getRefreshToken();
+        if (refresh == null) {
+            retorno.erro("Faça login primeiro.");
+            return;
+        }
+        JSONObject corpo = new JSONObject();
+        try {
+            corpo.put("refresh_token", refresh);
+        } catch (JSONException e) {
+            retorno.erro("Dados inválidos.");
+            return;
+        }
+        chamar("/auth/v1/token?grant_type=refresh_token", corpo, retorno);
+    }
+
     private static void chamar(String caminho, JSONObject corpo, Retorno retorno) {
         Request pedido = new Request.Builder()
                 .url(SupabaseConfig.URL + caminho)
@@ -66,7 +83,7 @@ public class AuthApi {
         CLIENT.newCall(pedido).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                retorno.erro("Sem conexão. Verifique a internet.");
+                retorno.erro(MSG_SEM_CONEXAO);
             }
 
             @Override

@@ -9,6 +9,7 @@ import com.example.chrock.data.Sessao;
 public class Acesso {
 
     public static boolean exigirLogin(Activity tela) {
+        Sessao.carregar(tela);
         if (Sessao.estaLogado()) return true;
         irParaLogin(tela);
         return false;

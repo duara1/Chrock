@@ -61,30 +61,15 @@
             </intent-filter>
         </activity>
 
-        <!-- Modulos de historico, resumos e notificacoes -->
-
-        
-
-        
-
-        
-
-        
+        <activity
+            android:name=".ResumoPessoalActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
-                android:name=".NotificacoesActivity"
-                android:exported="false"
-                android:windowSoftInputMode="adjustResize" />
-
-        <activity
-                android:name=".ResumoPessoalActivity"
-                android:exported="false"
-                android:windowSoftInputMode="adjustResize" />
-
-        <activity
-                android:name=".ResumoSalaActivity"
-                android:exported="false"
-                android:windowSoftInputMode="adjustResize" />
+            android:name=".ResumoSalaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 

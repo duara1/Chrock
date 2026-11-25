@@ -26,11 +26,41 @@ public class Login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Sessao.estaLogado()) {
-            abrirSalas();
+        Sessao.carregar(this);
+        if (Sessao.getRefreshToken() != null) {
+            continuarLogado();
             return;
         }
 
+        mostrarLogin();
+    }
+
+    private void continuarLogado() {
+        AuthApi.renovar(new AuthApi.Retorno() {
+            @Override
+            public void sucesso() {
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    abrirSalas();
+                });
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    if (AuthApi.MSG_SEM_CONEXAO.equals(mensagem)) {
+                        abrirSalas();
+                        return;
+                    }
+                    Sessao.encerrar();
+                    mostrarLogin();
+                });
+            }
+        });
+    }
+
+    private void mostrarLogin() {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

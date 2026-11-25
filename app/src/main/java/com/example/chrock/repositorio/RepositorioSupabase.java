@@ -35,6 +35,7 @@ public class RepositorioSupabase {
     public static final String SALA_NAO_ENCONTRADA = "Sala não encontrada.";
 
     private static final String BUCKET_SALAS = "salas";
+    private static final String BUCKET_PERFIS = "perfis";
 
     private static final Handler TELA = new Handler(Looper.getMainLooper());
     private static RepositorioSupabase instancia;
@@ -229,6 +230,44 @@ public class RepositorioSupabase {
         });
     }
 
+    public void salvarFotoPerfil(byte[] fotoJpeg, Resposta<String> resposta) {
+        String eu = Sessao.getUsuarioId();
+        String caminho = eu + "/" + UUID.randomUUID() + ".jpg";
+
+        Api.enviarArquivo(BUCKET_PERFIS, caminho, fotoJpeg, "image/jpeg", new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                String endereco = SupabaseConfig.URL + "/storage/v1/object/public/"
+                        + BUCKET_PERFIS + "/" + caminho;
+
+                JSONObject dados = new JSONObject();
+                try {
+                    dados.put("img", endereco);
+                } catch (JSONException e) {
+                    falhar(resposta, "Dados inválidos.");
+                    return;
+                }
+
+                Api.atualizar("/rest/v1/profiles?id=eq." + eu, dados, new Api.Resultado() {
+                    @Override
+                    public void sucesso(String corpo) {
+                        entregar(resposta, endereco);
+                    }
+
+                    @Override
+                    public void erro(String mensagem) {
+                        falhar(resposta, mensagem);
+                    }
+                });
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
     public void criarSala(String titulo, String descricao, String img, Resposta<String> resposta) {
         JSONObject args = new JSONObject();
         try {
@@ -339,6 +378,20 @@ public class RepositorioSupabase {
         });
     }
 
+    public void baixarComprovante(String caminho, Resposta<byte[]> resposta) {
+        Api.baixarArquivo("comprovantes", caminho, new Api.ResultadoArquivo() {
+            @Override
+            public void sucesso(byte[] dados) {
+                entregar(resposta, dados);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
     public void sinalizarTransferencia(String despesaId, Resposta<Void> resposta) {
         JSONObject args = new JSONObject();
         try {
@@ -420,105 +473,4 @@ public class RepositorioSupabase {
             }
         });
     }
-
-
-    // ==========================================
-    // MODULO DE NOTIFICACOES
-    // ==========================================
-
-    public void carregarNotificacoes(
-            String salaId,
-            Resposta<JSONArray> resposta) {
-
-        Api.get(
-                "/rest/v1/notificacoes"
-                        + "?select=id,titulo,mensagem,tipo,lida,criada_em"
-                        + "&sala_id=eq." + salaId
-                        + "&order=criada_em.desc,id.desc",
-                new Api.Resultado() {
-
-                    @Override
-                    public void sucesso(String corpo) {
-                        try {
-                            JSONArray lista = new JSONArray(corpo);
-                            entregar(resposta, lista);
-                        } catch (JSONException e) {
-                            falhar(resposta,
-                                    "Erro ao interpretar notificações.");
-                        }
-                    }
-
-                    @Override
-                    public void erro(String mensagem) {
-                        falhar(resposta, mensagem);
-                    }
-                }
-        );
-    }
-
-    public void gerarLembretesVencimento(
-            String salaId,
-            Resposta<Void> resposta) {
-
-        executarRpcNotificacao(
-                "gerar_lembretes_vencimento",
-                "p_sala",
-                salaId,
-                resposta
-        );
-    }
-
-    public void marcarNotificacaoLida(
-            String notificacaoId,
-            Resposta<Void> resposta) {
-
-        executarRpcNotificacao(
-                "marcar_notificacao_lida",
-                "p_notificacao",
-                notificacaoId,
-                resposta
-        );
-    }
-
-    public void marcarTodasNotificacoesLidas(
-            String salaId,
-            Resposta<Void> resposta) {
-
-        executarRpcNotificacao(
-                "marcar_todas_notificacoes_lidas",
-                "p_sala",
-                salaId,
-                resposta
-        );
-    }
-
-    private void executarRpcNotificacao(
-            String funcao,
-            String parametro,
-            String valor,
-            Resposta<Void> resposta) {
-
-        JSONObject args = new JSONObject();
-
-        try {
-            args.put(parametro, valor);
-        } catch (JSONException e) {
-            falhar(resposta, "Dados inválidos.");
-            return;
-        }
-
-        Api.rpc(funcao, args, new Api.Resultado() {
-
-            @Override
-            public void sucesso(String corpo) {
-                entregar(resposta, null);
-            }
-
-            @Override
-            public void erro(String mensagem) {
-                falhar(resposta, mensagem);
-            }
-        });
-    }
-
 }

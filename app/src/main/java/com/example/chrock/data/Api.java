@@ -61,14 +61,20 @@ public class Api {
         executar(pedido, resultado);
     }
 
-    private static Request.Builder comCabecalhos(String caminho) {
-        return new Request.Builder()
-                .url(SupabaseConfig.URL + caminho)
-                .addHeader("apikey", SupabaseConfig.CHAVE_PUBLICA)
-                .addHeader("Authorization", "Bearer " + Sessao.getAccessToken());
+    public interface ResultadoArquivo {
+        void sucesso(byte[] dados);
+        void erro(String mensagem);
     }
 
-    private static void executar(Request pedido, Resultado resultado) {
+    public static void baixarArquivo(String bucket, String caminho, ResultadoArquivo resultado) {
+        if (!Sessao.estaLogado()) {
+            resultado.erro("Faça login primeiro.");
+            return;
+        }
+        Request pedido = comCabecalhos("/storage/v1/object/authenticated/" + bucket + "/" + caminho)
+                .get()
+                .build();
+
         CLIENT.newCall(pedido).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -77,9 +83,43 @@ public class Api {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response resposta) throws IOException {
+                if (resposta.isSuccessful()) {
+                    resultado.sucesso(resposta.body().bytes());
+                } else if (resposta.code() == 401) {
+                    Sessao.encerrar();
+                    resultado.erro("Sua sessão expirou. Entre de novo.");
+                } else {
+                    resultado.erro("Não foi possível abrir o comprovante.");
+                }
+            }
+        });
+    }
+
+    private static Request.Builder comCabecalhos(String caminho) {
+        return new Request.Builder()
+                .url(SupabaseConfig.URL + caminho)
+                .addHeader("apikey", SupabaseConfig.CHAVE_PUBLICA)
+                .addHeader("Authorization", "Bearer " + Sessao.getAccessToken());
+    }
+
+    private static void executar(Request pedido, Resultado resultado) {
+        executar(pedido, resultado, true);
+    }
+
+    private static void executar(Request pedido, Resultado resultado, boolean podeRenovar) {
+        CLIENT.newCall(pedido).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                resultado.erro(AuthApi.MSG_SEM_CONEXAO);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response resposta) throws IOException {
                 String texto = resposta.body().string();
                 if (resposta.isSuccessful()) {
                     resultado.sucesso(texto);
+                } else if (resposta.code() == 401 && podeRenovar) {
+                    renovarETentarDeNovo(pedido, resultado);
                 } else if (resposta.code() == 401) {
                     Sessao.encerrar();
                     resultado.erro("Sua sessão expirou. Entre de novo.");
@@ -88,6 +128,40 @@ public class Api {
                 }
             }
         });
+    }
+
+    private static void renovarETentarDeNovo(Request pedido, Resultado resultado) {
+        AuthApi.renovar(new AuthApi.Retorno() {
+            @Override
+            public void sucesso() {
+                Request novo = pedido.newBuilder()
+                        .header("Authorization", "Bearer " + Sessao.getAccessToken())
+                        .build();
+                executar(novo, resultado, false);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                if (AuthApi.MSG_SEM_CONEXAO.equals(mensagem)) {
+                    resultado.erro(mensagem);
+                    return;
+                }
+                Sessao.encerrar();
+                resultado.erro("Sua sessão expirou. Entre de novo.");
+            }
+        });
+    }
+
+    public static void atualizar(String caminho, JSONObject dados, Resultado resultado) {
+        if (!Sessao.estaLogado()) {
+            resultado.erro("Faça login primeiro.");
+            return;
+        }
+        Request pedido = comCabecalhos(caminho)
+                .addHeader("Prefer", "return=minimal")
+                .patch(RequestBody.create(dados.toString(), JSON))
+                .build();
+        executar(pedido, resultado);
     }
 
     private static String mensagemDeErro(String texto) {
