@@ -191,7 +191,7 @@ public class SalaInicio extends AppCompatActivity {
         List<Despesa> responsavel = Secoes.souResponsavel(despesas, eu);
 
         ((RecyclerView) findViewById(R.id.listaConfirmar))
-                .setAdapter(new ConfirmacaoAdapter(aConfirmar));
+                .setAdapter(new ConfirmacaoAdapter(aConfirmar, this::carregarHome));
         ((RecyclerView) findViewById(R.id.listaTransferir))
                 .setAdapter(new transferenciaAdapter(aTransferir));
         adapter = new responsavelAdapter(responsavel,

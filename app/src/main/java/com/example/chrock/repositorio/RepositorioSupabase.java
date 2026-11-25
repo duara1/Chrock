@@ -392,6 +392,38 @@ public class RepositorioSupabase {
         });
     }
 
+    public void confirmarTransferencia(String despesaId, String usuarioId, Resposta<Void> resposta) {
+        responderTransferencia("confirmar_transferencia", despesaId, usuarioId, resposta);
+    }
+
+    public void contestarTransferencia(String despesaId, String usuarioId, Resposta<Void> resposta) {
+        responderTransferencia("contestar_transferencia", despesaId, usuarioId, resposta);
+    }
+
+    private void responderTransferencia(String funcao, String despesaId, String usuarioId,
+                                        Resposta<Void> resposta) {
+        JSONObject args = new JSONObject();
+        try {
+            args.put("p_despesa", despesaId);
+            args.put("p_usuario", usuarioId);
+        } catch (JSONException e) {
+            falhar(resposta, "Dados inválidos.");
+            return;
+        }
+
+        Api.rpc(funcao, args, new Api.Resultado() {
+            @Override
+            public void sucesso(String corpo) {
+                entregar(resposta, null);
+            }
+
+            @Override
+            public void erro(String mensagem) {
+                falhar(resposta, mensagem);
+            }
+        });
+    }
+
     public void sinalizarTransferencia(String despesaId, Resposta<Void> resposta) {
         JSONObject args = new JSONObject();
         try {
