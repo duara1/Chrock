@@ -1,17 +1,18 @@
 package com.example.chrock.Adapter;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.cardview.widget.CardView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chrock.R;
 import com.example.chrock.model.Usuario;
+import com.example.chrock.util.Animacao;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +20,13 @@ import java.util.Set;
 
 public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHolder> {
 
-    private List<Usuario> listaUsuarios;
-    private Set<String> usuariosSelecionados = new HashSet<>();
+    private final List<Usuario> listaUsuarios;
+    private final Set<String> usuariosSelecionados = new HashSet<>();
 
     public UsuarioAdapter(List<Usuario> lista) {
         this.listaUsuarios = lista;
     }
+
     public Set<String> getUsuariosSelecionados() {
         return usuariosSelecionados;
     }
@@ -32,36 +34,41 @@ public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.molde_user, parent, false);
-
-        return new ViewHolder(view);
+        View card = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_participantes, parent, false);
+        return new ViewHolder(card);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
+        Usuario usuario = listaUsuarios.get(position);
+        boolean marcado = usuariosSelecionados.contains(usuario.getId());
 
-        Usuario usuarioAtual = listaUsuarios.get(position);
+        h.nome.setText(usuario.getNome());
 
-        holder.textNome.setText(usuarioAtual.getNome());
-        String idUsuario = usuarioAtual.getId();
-
-        if (usuariosSelecionados.contains(idUsuario)) {
-            holder.cardUsuario.setCardBackgroundColor(Color.parseColor("#8059CD3B"));
+        String img = usuario.getImg();
+        if (img != null && !img.trim().isEmpty()) {
+            Glide.with(h.foto)
+                    .load(img)
+                    .placeholder(R.drawable.fundo_avatar)
+                    .error(R.drawable.fundo_avatar)
+                    .centerCrop()
+                    .into(h.foto);
         } else {
-            holder.cardUsuario.setCardBackgroundColor(Color.WHITE);
+            Glide.with(h.foto).clear(h.foto);
+            h.foto.setImageResource(R.drawable.fundo_avatar);
         }
-        holder.itemView.setOnClickListener(v -> {
 
-            if (usuariosSelecionados.contains(idUsuario)) {
-                usuariosSelecionados.remove(idUsuario);
-            } else {
-                usuariosSelecionados.add(idUsuario);
-            }
+        h.itemView.setBackgroundResource(marcado ? R.drawable.card_selecionado : R.drawable.borda_card);
+        h.itemView.setContentDescription(usuario.getNome() + (marcado ? ", vai contribuir" : ""));
 
-            notifyItemChanged(position);
+        h.itemView.setOnClickListener(v -> {
+            int pos = h.getBindingAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
 
+            String id = listaUsuarios.get(pos).getId();
+            if (!usuariosSelecionados.add(id)) usuariosSelecionados.remove(id);
+            notifyItemChanged(pos);
         });
     }
 
@@ -72,14 +79,14 @@ public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView textNome;
-        CardView cardUsuario;
+        ImageView foto;
+        TextView nome;
 
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-
-            cardUsuario = itemView.findViewById(R.id.cardUsuario);
-            textNome = itemView.findViewById(R.id.textView14);
+        public ViewHolder(@NonNull View card) {
+            super(card);
+            foto = card.findViewById(R.id.foto);
+            nome = card.findViewById(R.id.textView);
+            Animacao.efeitoApertar(card);
         }
     }
 }

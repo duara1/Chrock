@@ -113,16 +113,34 @@
             tools:text="00/00/0000"
             app:layout_constraintStart_toEndOf="@id/nomeResponsavel"/>
 
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/fimResponsavel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="nomeResponsavel,dataVencimento" />
+
         <TextView
             android:id="@+id/valorTransferir"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
             android:text="Valor a transferir:"
             android:textColor="@color/black"
-            app:layout_constraintBottom_toBottomOf="@+id/btnPix"
-            app:layout_constraintEnd_toStartOf="@+id/btnPix"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/btnPix" />
+            app:layout_constraintTop_toBottomOf="@id/fimResponsavel"
+            app:layout_constraintWidth_percent="0.5" />
+
+        <TextView
+            android:id="@+id/valor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:textColor="@color/black"
+            android:text="00,00"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/valorTransferir"
+            app:layout_constraintWidth_percent="0.5"/>
 
         <Button
             android:id="@+id/btnPix"
@@ -134,21 +152,10 @@
             android:backgroundTint="@color/roxoBtn"
             app:rippleColor="#20FFFFFF"
             android:textColor="@color/white"
-            android:layout_marginTop="25dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/valorTransferir"
-            app:layout_constraintTop_toBottomOf="@+id/dataVencimento" />
-
-        <TextView
-            android:id="@+id/valor"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:maxLines="2"
-            android:textColor="@color/black"
-            android:text="00,00"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/valorTransferir"
-            app:layout_constraintWidth_percent="0.45"/>
+            app:layout_constraintTop_toTopOf="@id/valorTransferir"
+            app:layout_constraintBottom_toBottomOf="@id/valor"
+            app:layout_constraintWidth_percent="0.45" />
 
         <TextView
             android:id="@+id/contribuentes"

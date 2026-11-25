@@ -148,6 +148,7 @@ public class historico extends AppCompatActivity {
     }
 
     private boolean entraNoMeuHistorico(Despesa d, String eu) {
+        if (d.isConcluida()) return false;
         if (!d.isContribuente(eu)) return false;
         if (d.getResponsavelId().equals(eu)) return false;
 

@@ -1,5 +1,6 @@
 package com.example.chrock;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
@@ -22,6 +23,7 @@ import com.example.chrock.repositorio.RepositorioSupabase;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +67,7 @@ public class criar_despesa extends AppCompatActivity {
         }
 
         editData = findViewById(R.id.editTextDataVencimento);
+        editData.setOnClickListener(v -> abrirCalendario());
         editValor = findViewById(R.id.editTextValorConta);
         RecyclerView rvUsuario = findViewById(R.id.rv_usuario);
         listaUsuario = new ArrayList<>();
@@ -84,6 +87,40 @@ public class criar_despesa extends AppCompatActivity {
         });
 
         findViewById(R.id.btnVoltar).setOnClickListener(v -> finish());
+    }
+
+    private void abrirCalendario() {
+        Calendar inicial = Calendar.getInstance();
+
+        String atual = editData.getText().toString().trim();
+        if (!atual.isEmpty()) {
+            try {
+                SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                formato.setLenient(false);
+                Calendar escolhida = Calendar.getInstance();
+                escolhida.setTime(formato.parse(atual));
+                inicial = escolhida;
+            } catch (ParseException ignorada) {
+            }
+        }
+
+        DatePickerDialog calendario = new DatePickerDialog(
+                this,
+                (view, ano, mes, dia) -> editData.setText(
+                        String.format(Locale.getDefault(), "%02d/%02d/%04d", dia, mes + 1, ano)),
+                inicial.get(Calendar.YEAR),
+                inicial.get(Calendar.MONTH),
+                inicial.get(Calendar.DAY_OF_MONTH)
+        );
+
+        Calendar inicioDeHoje = Calendar.getInstance();
+        inicioDeHoje.set(Calendar.HOUR_OF_DAY, 0);
+        inicioDeHoje.set(Calendar.MINUTE, 0);
+        inicioDeHoje.set(Calendar.SECOND, 0);
+        inicioDeHoje.set(Calendar.MILLISECOND, 0);
+        calendario.getDatePicker().setMinDate(inicioDeHoje.getTimeInMillis());
+
+        calendario.show();
     }
 
     private void carregarUsuarios() {
@@ -116,12 +153,17 @@ public class criar_despesa extends AppCompatActivity {
 
         String responsavelId = Sessao.getUsuarioId();
 
+        if (data.isEmpty()) {
+            Toast.makeText(this, "Escolha a data de vencimento.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String dataSQL;
 
         try {
             dataSQL = converterData(data);
         } catch (ParseException e) {
-            Toast.makeText(this, "Data inválida. Use dd/mm/aaaa.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Escolha a data de vencimento.", Toast.LENGTH_SHORT).show();
             return;
         }
 

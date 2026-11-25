@@ -90,6 +90,11 @@ public class Cadastrar extends AppCompatActivity {
         }
         if (chavePix.isEmpty()) {
             campoChave.setError("Digite sua chave Pix");
+            campoChave.requestFocus();
+            return;
+        }
+        if (fotoEscolhida == null) {
+            Toast.makeText(this, "Escolha uma foto de perfil", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -102,11 +107,7 @@ public class Cadastrar extends AppCompatActivity {
             public void sucesso() {
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) return;
-                    if (fotoEscolhida == null) {
-                        abrirSalas();
-                    } else {
-                        enviarFoto();
-                    }
+                    enviarFoto();
                 });
             }
 
