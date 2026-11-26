@@ -3,11 +3,13 @@ package com.example.chrock.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chrock.R;
 import com.example.chrock.model.Usuario;
 import com.example.chrock.util.Animacao;
@@ -32,10 +34,12 @@ public class ParticipantesAdapter extends RecyclerView.Adapter<ParticipantesAdap
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView foto;
         TextView nome;
 
         ViewHolder(View card) {
             super(card);
+            foto = card.findViewById(R.id.foto);
             nome = card.findViewById(R.id.textView);
             Animacao.efeitoApertar(card);
         }
@@ -55,6 +59,20 @@ public class ParticipantesAdapter extends RecyclerView.Adapter<ParticipantesAdap
         boolean marcado = selecionados.contains(u.getId());
 
         h.nome.setText(u.getNome());
+
+        String img = u.getImg();
+        if (img != null && !img.trim().isEmpty()) {
+            Glide.with(h.foto)
+                    .load(img)
+                    .placeholder(R.drawable.fundo_avatar)
+                    .error(R.drawable.fundo_avatar)
+                    .centerCrop()
+                    .into(h.foto);
+        } else {
+            Glide.with(h.foto).clear(h.foto);
+            h.foto.setImageResource(R.drawable.fundo_avatar);
+        }
+
         h.itemView.setBackgroundResource(marcado ? R.drawable.card_selecionado : R.drawable.borda_card);
         h.itemView.setContentDescription(u.getNome() + (marcado ? ", moderador" : ""));
 
